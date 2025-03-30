@@ -9,7 +9,9 @@ public class PlayerAttack : MonoBehaviour
     private SwitchHPState switchHPState;
     private int comboStep = 0;
     private float lastAttackTime;
+    private bool isAttacking = false;
 
+    //attack event
 
     private void Awake()
     {
@@ -26,14 +28,18 @@ public class PlayerAttack : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Time.time - lastAttackTime > comboResetTime)
+        if (Time.time - lastAttackTime > comboResetTime && isAttacking)
         {
             comboStep = 0;
+            isAttacking = false;
+            PlayerEvent.AttackEnded();
         }
     }
 
     private void Attack()
     {
+        isAttacking = true;
+
         if (attackStrategy == null || switchHPState.CurrentState == null)
         {
             Debug.LogWarning("Ќе назначена стратеги€ атаки или нет состо€ни€!");
@@ -41,6 +47,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         attackStrategy.PerformAttack(switchHPState.CurrentState, comboStep);
+        PlayerEvent.AttackStarted(comboStep);
         comboStep = (comboStep + 1) % maxComboSteps;
         lastAttackTime = Time.time;
     }

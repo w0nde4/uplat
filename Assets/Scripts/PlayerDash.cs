@@ -24,21 +24,18 @@ public class PlayerDash : MonoBehaviour
     private float originalGravityScale;
 
     private bool isDashing = false;
-    private bool isFlipped = false;
     private bool isGrounded = true;
 
     private float lastDashTime;
     private Vector2 direction;
 
     private void OnEnable()
-    {
-        PlayerEvent.OnFlipChanged += HandleFlip;    
+    { 
         PlayerEvent.OnGroundedChanged += HandleGrounded;    
     }
 
     private void OnDisable()
     {
-        PlayerEvent.OnFlipChanged -= HandleFlip;
         PlayerEvent.OnGroundedChanged -= HandleGrounded;
     }
 
@@ -60,8 +57,9 @@ public class PlayerDash : MonoBehaviour
 
     private IEnumerator Dash()
     {
+        float horizontalVelocity = rb.linearVelocity.x;
         float startTime = Time.time;
-        direction = isFlipped ? Vector2.left : Vector2.right;
+        direction = horizontalVelocity < 0 ? Vector2.left : Vector2.right;
 
         isDashing = true;
         PlayerEvent.DashChanged(isDashing);
@@ -92,11 +90,6 @@ public class PlayerDash : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x * endDashVelocityMultiplier, rb.linearVelocity.y);
 
         lastDashTime = Time.time;
-    }
-
-    private void HandleFlip(bool isFlipped)
-    {
-        this.isFlipped = isFlipped;
     }
 
     private void HandleGrounded(bool isGrounded)

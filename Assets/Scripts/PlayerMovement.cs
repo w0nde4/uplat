@@ -11,14 +11,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float deceleration = 20f;
 
     private Rigidbody2D rb;
-    private SpriteRenderer sr;
 
     private float moveInput;
     private float currentSpeed;
 
     private bool isDashing;
-    private bool isFlipped;
-    private bool lastFlip;
 
     private void OnEnable()
     {
@@ -33,8 +30,6 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>();
-        isFlipped = sr.flipX;
         currentSpeed = 0;
     }
 
@@ -43,8 +38,6 @@ public class PlayerMovement : MonoBehaviour
         if (!isDashing)
         {
             moveInput = Input.GetAxis("Horizontal");
-            Move();
-            HandleFlip();
         }
     }
 
@@ -74,36 +67,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         float direction = moveInput != 0 ? Mathf.Sign(moveInput) : 0;
-        rb.linearVelocity = new Vector2(direction * currentSpeed, rb.linearVelocity.y);
-    }
-
-    private void HandleFlip()
-    {
-        if (Mathf.Abs(moveInput) > 0.01f)
-        {
-            bool previousFlipState = isFlipped;
-
-            if (moveInput > 0)
-            {
-                sr.flipX = false;
-                isFlipped = false;
-            }
-            else if (moveInput < 0)
-            {
-                sr.flipX = true;
-                isFlipped = true;
-            }
-
-            if (previousFlipState != isFlipped)
-            {
-                PlayerEvent.FlipChanged(isFlipped);
-            }
-        }
-    }
-
-    private void Move()
-    {
-        
+        float horizontalSpeed = currentSpeed * direction;
+        rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);
     }
 
     private void HandleDash(bool isDashing)
