@@ -1,11 +1,25 @@
 using UnityEngine;
 
-public class HighHPState : HPState
+public class HighHPState : FSMState
 {
-    public HighHPState(FSM fsm, PlayerHP playerHP, float healthToSwitch)
-        : base(fsm, playerHP, healthToSwitch) { }
+    private Player player;
+    public HighHPState(Player player)
+    {
+        this.player = player;
+    }
 
-    public override void Enter() { }
+    public override void Enter() 
+    {
+        Debug.Log("Entering High HP State");
+    }
 
-    public override void Exit() { }
+    public override void Update()
+    {
+        //
+    }
+
+    public override void Exit() 
+    {
+        Debug.Log("Exiting High HP State");
+    }
 }
