@@ -1,6 +1,4 @@
-using JetBrains.Annotations;
 using System;
-using Unity.Burst;
 using UnityEngine;
 
 public class Health : MonoBehaviour, IDamagable

@@ -1,25 +1,16 @@
 using UnityEngine;
 
-public class LowHPState : FSMState
+public class LowHPState : HPState
 {
-    Player player;
-    public LowHPState(Player player)
-    {
-        this.player = player; 
-    }
+    public LowHPState(FSM fsm, Health health, float lowHPThreshold)
+        : base(fsm, health, lowHPThreshold) { }
 
-    public override void Enter() 
+    protected override void HandleHealthChanged(int current, int max)
     {
-        Debug.Log("Entering Low HP State");
-    }
+        float ratio = (float)current / max;
+        if (ShouldTransition(ratio))
+            Fsm.SetState<HighHPState>();
 
-    public override void Update()
-    {
-        
-    }
-
-    public override void Exit() 
-    {
-        Debug.Log("Exiting Low HP State");
+        Fsm.Update();
     }
 }

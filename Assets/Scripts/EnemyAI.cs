@@ -76,17 +76,14 @@ public class EnemyAI : MonoBehaviour
 
         if (distanceToPlayer <= attackRange)
         {
-            Debug.Log("Switching to ATTACK");
             currentState = EnemyState.Attack;
         }
         else if (distanceToPlayer <= detectionRange)
         {
-            Debug.Log("Switching to CHASE");
             currentState = EnemyState.Chase;
         }
         else
         {
-            Debug.Log("Switching to PATROL");
             currentState = EnemyState.Patrol;
         }
     }
@@ -130,18 +127,14 @@ public class EnemyAI : MonoBehaviour
 
     private void MoveTowards(Vector2 targetPosition, float speed)
     {
-        Vector2 direction = (targetPosition - (Vector2)transform.position).normalized;
-        rb.linearVelocity = direction * speed;
-
-        if (direction.x != 0)
-        {
-            sr.flipX = direction.x < 0;
-        }
+        float direction = Mathf.Clamp((targetPosition.x - transform.position.x), -1, 1);
+        rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
     }
 
     private void OnDeath()
     {
         rb.linearVelocity = Vector2.zero;
+        sr.color = Color.red;
 
         enabled = false;
     }

@@ -7,16 +7,14 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private int maxComboSteps = 3;
     [SerializeField] private LayerMask enemyLayer;
 
-    private SwitchHPState switchHPState;
+    private HPStatesInit hpStatesInit;
     private int comboStep = 0;
     private float lastAttackTime;
     private bool isAttacking = false;
 
-    //attack event
-
     private void Awake()
     {
-        switchHPState = GetComponent<SwitchHPState>();
+        hpStatesInit = GetComponent<HPStatesInit>();
     }
 
     private void Update()
@@ -39,7 +37,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void Attack()
     {
-        if (attackStrategy == null || switchHPState.CurrentState == null)
+        if (attackStrategy == null || hpStatesInit.GetCurrentState() == null)
         {
             Debug.LogWarning("Ќе назначена стратеги€ атаки или нет состо€ни€!");
             return;
@@ -47,7 +45,7 @@ public class PlayerAttack : MonoBehaviour
         isAttacking = true;
         lastAttackTime = Time.time;
 
-        attackStrategy.PerformAttack(switchHPState.CurrentState, comboStep);
+        attackStrategy.PerformAttack(hpStatesInit.GetCurrentState(), comboStep);
 
         float attackRange = attackStrategy.GetAttackRange();
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
@@ -74,6 +72,6 @@ public class PlayerAttack : MonoBehaviour
 
     public int GetDamage()
     {
-        return attackStrategy.CalculateDamage(switchHPState.CurrentState, comboStep);
+        return attackStrategy.CalculateDamage(hpStatesInit.GetCurrentState(), comboStep);
     }
 }

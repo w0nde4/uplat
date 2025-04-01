@@ -1,5 +1,4 @@
 using System;
-using System.IO.IsolatedStorage;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]

@@ -1,6 +1,11 @@
 public abstract class FSMState
 {
-    public abstract void Enter();
-    public abstract void Update();
-    public abstract void Exit();
+    protected readonly FSM Fsm;
+    public FSMState(FSM fsm)
+    {
+        Fsm = fsm;
+    }
+    public virtual void Enter() { }
+    public virtual void Update() { }
+    public virtual void Exit() { }
 }
