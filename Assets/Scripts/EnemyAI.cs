@@ -94,12 +94,10 @@ public class EnemyAI : MonoBehaviour
             return;
 
         Transform targetPoint = patrolPoints[currentPatrolIndex];
-        Debug.Log($"Moving to {targetPoint.position}");
         MoveTowards(targetPoint.position, moveSpeed);
 
         if (Vector2.Distance(transform.position, targetPoint.position) < waypointThreshold)
         {
-            Debug.Log("Reached waypoint, switching to next");
             currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
         }
     }

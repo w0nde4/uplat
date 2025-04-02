@@ -1,15 +1,20 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttack : MonoBehaviour
+public class PlayerAttack : MonoBehaviour, IDirectionable
 {
     [SerializeField] private AttackStrategy attackStrategy;
-    [SerializeField] private float comboResetTime = 1f;
-    [SerializeField] private int maxComboSteps = 3;
-    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float comboResetTime = 1f; //?
+    [SerializeField] private int maxComboSteps = 3; //?
+    [SerializeField] private LayerMask enemyLayer; //?
 
     private HPStatesInit hpStatesInit;
-    private int comboStep = 0;
+
+    //evrth for combo ? 
+    private int comboStep = 0; 
     private float lastAttackTime;
+
     private bool isAttacking = false;
 
     private void Awake()
@@ -21,57 +26,50 @@ public class PlayerAttack : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
-            Attack();
+            PerformAttackSequence(); //not sequence
         }
     }
 
     private void FixedUpdate()
     {
-        if (Time.time - lastAttackTime > comboResetTime && isAttacking)
+        if (isAttacking && Time.time - lastAttackTime > comboResetTime)
         {
-            comboStep = 0;
-            isAttacking = false;
-            PlayerEvent.AttackEnded();
+            ResetCombo(); // combo?
         }
     }
 
-    private void Attack()
+    private void ResetCombo()
     {
-        if (attackStrategy == null || hpStatesInit.GetCurrentState() == null)
+        comboStep = 0;
+        isAttacking = false;
+        PlayerEvent.AttackEnded();
+    }
+
+    private void PerformAttackSequence()
+    {
+        if (!IsAttackValid())
         {
             Debug.LogWarning("Ќе назначена стратеги€ атаки или нет состо€ни€!");
             return;
         }
+
         isAttacking = true;
-        lastAttackTime = Time.time;
+        lastAttackTime = Time.time; //?
 
-        attackStrategy.PerformAttack(hpStatesInit.GetCurrentState(), comboStep);
-
-        float attackRange = attackStrategy.GetAttackRange();
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
-
-        foreach (Collider2D enemy in hitEnemies)
-        {
-            PerformAttack(enemy.gameObject);
-        }
+        attackStrategy.PerformAttack(gameObject, hpStatesInit.GetCurrentState(), comboStep);
 
         PlayerEvent.AttackStarted(comboStep);
-        comboStep = (comboStep + 1) % maxComboSteps;
+        comboStep = (comboStep + 1) % maxComboSteps; //?
     }
 
-    public void PerformAttack(GameObject target)
+    private bool IsAttackValid()
     {
-        IDamagable damagable = target.GetComponent<IDamagable>();
-
-        if(damagable != null && damagable.IsAlive())
-        {
-            int damage = GetDamage();
-            damagable.TakeDamage(damage, gameObject);
-        }
+        return attackStrategy != null && hpStatesInit.GetCurrentState() != null;
     }
 
-    public int GetDamage()
+    public Vector2 GetFacingDirection()
     {
-        return attackStrategy.CalculateDamage(hpStatesInit.GetCurrentState(), comboStep);
+        var movement = GetComponent<PlayerMovement>();
+        return movement.GetFacingDirection();
     }
 }

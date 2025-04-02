@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent (typeof(SpriteRenderer))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour, IDirectionable
 {
     [SerializeField] private float maxSpeed = 5f;
     [SerializeField] private float acceleration = 30f;
@@ -73,5 +73,10 @@ public class PlayerMovement : MonoBehaviour
     private void HandleDash(bool isDashing)
     {
         this.isDashing = isDashing;
+    }
+
+    public Vector2 GetFacingDirection()
+    {
+        return new Vector2(moveInput, 0f);
     }
 }

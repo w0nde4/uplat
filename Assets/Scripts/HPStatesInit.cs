@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class HPStatesInit : MonoBehaviour
 {
-    [SerializeField] private float lowHPThreshold = 0.3f;
+    [Range(0, 1)] [SerializeField] private float lowHPThreshold = 0.3f;
 
     private FSM fsm;
     private Health health;

@@ -5,17 +5,13 @@ public class AAttackStrategy : AttackStrategy
 {
     [SerializeField] private float highHpDamageMult = 1.2f;
     [SerializeField] private float lowHpDamageMult = 0.8f;
-    public override void PerformAttack(FSMState state, int comboStep)
+    public override void PerformAttack(GameObject attacker, FSMState state, int comboStep)
     {
-        string comboText = comboStep == 0 ? "First" : comboStep == 1 ? "Second" : "Last";
-
-        if (state is HighHPState)
+        var damage = CalculateDamage(state, comboStep);
+        var attackerPosition = attacker.transform.position;
+        foreach(var enemy in GetAttackedEnemies(attackerPosition))
         {
-            Debug.Log($"A: Full! ({comboText} hit)");
-        }
-        else if (state is LowHPState)
-        {
-            Debug.Log($"A: Low! ({comboText} hit)");
+            ApplyDamage(enemy.gameObject, attacker, damage);
         }
     }
 

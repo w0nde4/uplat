@@ -11,8 +11,6 @@ public class PlayerAnimator : MonoBehaviour
     private readonly string attackTrigger = "AttackTrigger";
     private readonly string comboStep = "ComboStep";
 
-    private PlayerAttack playerAttack;
-
     private int currentComboStep = 0;
 
     private void Awake()
@@ -20,7 +18,6 @@ public class PlayerAnimator : MonoBehaviour
         animator = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        playerAttack = GetComponent<PlayerAttack>();
     }
 
     private void OnEnable()
@@ -83,10 +80,5 @@ public class PlayerAnimator : MonoBehaviour
     private void HandleGroundedChanged(bool isGrounded)
     {
         animator.SetBool(this.isGrounded, isGrounded);
-    }
-
-    public void OnAttackAnimationHit() // ???
-    {
-        Debug.Log("Attack hit frame reached in animation");
     }
 }
