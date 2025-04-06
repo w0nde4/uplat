@@ -26,20 +26,17 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    private void Start()
-    {
-        Debug.Log("Projectile spawned: " + gameObject);
-    }
-
     void Update()
     {
-        Debug.Log("Projectile is moving...");
         transform.Translate(direction * speed * Time.deltaTime);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject == owner) return;
+        if (collision.gameObject == owner)
+        {
+            return;
+        }
 
         else if (((1 << collision.gameObject.layer) & targetLayer) != 0)
         {
@@ -49,7 +46,7 @@ public class Projectile : MonoBehaviour
                 return;
 
             IDamagable damagable = target.GetComponent<IDamagable>();
-            
+
             if (damagable != null)
             {
                 damagable.TakeDamage(damage, owner);
@@ -72,6 +69,7 @@ public class Projectile : MonoBehaviour
         }
         else
         {
+            Debug.Log(collision.gameObject);
             Destroy(gameObject);
         }
     }

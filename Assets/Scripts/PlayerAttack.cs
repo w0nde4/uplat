@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttack : MonoBehaviour, IDirectionable
+public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackStrategy attackStrategy;
-    [SerializeField] private float comboResetTime = 1f; //?
-    [SerializeField] private int maxComboSteps = 3; //?
-    [SerializeField] private LayerMask enemyLayer; //?
+    [SerializeField] private float comboResetTime = 1f;
+    [SerializeField] private int maxComboSteps = 3;
+    [SerializeField] private LayerMask enemyLayer;
 
     private HPStatesInit hpStatesInit;
 
-    //evrth for combo ? 
     private int comboStep = 0; 
     private float lastAttackTime;
 
@@ -26,7 +25,7 @@ public class PlayerAttack : MonoBehaviour, IDirectionable
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
-            PerformAttackSequence(); //not sequence
+            PerformAttackSequence();
         }
     }
 
@@ -34,7 +33,7 @@ public class PlayerAttack : MonoBehaviour, IDirectionable
     {
         if (isAttacking && Time.time - lastAttackTime > comboResetTime)
         {
-            ResetCombo(); // combo?
+            ResetCombo();
         }
     }
 
@@ -54,22 +53,16 @@ public class PlayerAttack : MonoBehaviour, IDirectionable
         }
 
         isAttacking = true;
-        lastAttackTime = Time.time; //?
+        lastAttackTime = Time.time;
 
         attackStrategy.PerformAttack(gameObject, hpStatesInit.GetCurrentState(), comboStep);
 
         PlayerEvent.AttackStarted(comboStep);
-        comboStep = (comboStep + 1) % maxComboSteps; //?
+        comboStep = (comboStep + 1) % maxComboSteps; 
     }
 
     private bool IsAttackValid()
     {
         return attackStrategy != null && hpStatesInit.GetCurrentState() != null;
-    }
-
-    public Vector2 GetFacingDirection()
-    {
-        var movement = GetComponent<PlayerMovement>();
-        return movement.GetFacingDirection();
     }
 }

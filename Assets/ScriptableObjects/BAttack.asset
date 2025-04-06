@@ -12,3 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89657b81dbc90e44488eaeaf5296a457, type: 3}
   m_Name: BAttack
   m_EditorClassIdentifier: 
+  baseDamage: 10
+  attackRange: 1.5
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  projectilePrefab: {fileID: 6795514783619623336, guid: 9bab87fe57487854889cd3ce22a6e6a0, type: 3}
+  projectileSpeed: 10
+  projectileLifetime: 3
+  cooldownTime: 1.5
+  projectileDamageMultiplier: 1
+  piercing: 0
+  maxPierceCount: 3

@@ -12,3 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02979ce835b2444a92bd28158dc16ba, type: 3}
   m_Name: AAttack
   m_EditorClassIdentifier: 
+  baseDamage: 10
+  attackRange: 1.5
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  highHpDamageMult: 1.2
+  lowHpDamageMult: 0.8

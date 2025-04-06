@@ -1404,7 +1404,7 @@ MonoBehaviour:
   attackCooldown: 1.5
   playerLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
 --- !u!114 &989765727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1422,7 +1422,7 @@ MonoBehaviour:
   - {fileID: 615906345}
   playerLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   moveSpeed: 2
   chaseSpeed: 3
   detectionRange: 5
@@ -2903,7 +2903,7 @@ GameObject:
   - component: {fileID: 1818567928}
   - component: {fileID: 1818567926}
   - component: {fileID: 1818567930}
-  m_Layer: 8
+  m_Layer: 10
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}

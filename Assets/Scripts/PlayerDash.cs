@@ -1,4 +1,6 @@
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -26,11 +28,17 @@ public class PlayerDash : MonoBehaviour
     private bool isGrounded = true;
 
     private float lastDashTime;
-    private Vector2 direction;
+    private Vector2 dashDirection;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        originalGravityScale = rb.gravityScale;
+    }
 
     private void OnEnable()
-    { 
-        PlayerEvent.OnGroundedChanged += HandleGrounded;    
+    {
+        PlayerEvent.OnGroundedChanged += HandleGrounded;
     }
 
     private void OnDisable()
@@ -38,57 +46,74 @@ public class PlayerDash : MonoBehaviour
         PlayerEvent.OnGroundedChanged -= HandleGrounded;
     }
 
-    private void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-        originalGravityScale = rb.gravityScale;
-    }
-
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && 
-            Time.time > lastDashTime + cooldown && !isDashing &&
-            (isGrounded || allowAirDash))
+        if (CanDash() && Input.GetKeyDown(KeyCode.LeftShift))
         {
-            StartCoroutine(Dash());
+            StartCoroutine(PerformDash());
         }
     }
 
-    private IEnumerator Dash()
+    private bool CanDash()
     {
-        float horizontalVelocity = rb.linearVelocity.x;
-        float startTime = Time.time;
-        direction = horizontalVelocity < 0 ? Vector2.left : Vector2.right;
+        return Time.time > lastDashTime + cooldown &&
+            !isDashing &&
+            (isGrounded || allowAirDash);
+    }
 
-        isDashing = true;
-        PlayerEvent.DashChanged(isDashing);
+    private IEnumerator PerformDash()
+    {
+        PrepareForDash();
+        float dashStartTime = Time.time;
 
-        float originalGravity = rb.gravityScale;
-        rb.gravityScale = gravityMultiplierDuringDash * originalGravity;
-
-        rb.linearVelocity = new Vector2(direction.x * force, rb.linearVelocity.y * verticalVelocityRetention);
-
-        while (Time.time < startTime + duration && isDashing)
+        while (Time.time < dashStartTime + duration && !IsObstacleAhead())
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, obstacleDetectionDistance, obstacleLayer);
-
-            if (hit.collider != null)
-            {
-                break;
-            }
-
-            rb.linearVelocity = new Vector2(direction.x * force, rb.linearVelocity.y * verticalVelocityRetention);
-
+            ApplyDashForce();
             yield return null;
         }
 
+        EndDash();
+    }
+
+    private void PrepareForDash()
+    {
+        isDashing = true;
+        lastDashTime = Time.time;
+
+        PlayerEvent.DashChanged(isDashing);
+
+        dashDirection = GetDashDirection();
+        rb.gravityScale = gravityMultiplierDuringDash * originalGravityScale;
+
+        ApplyDashForce();
+    }
+
+    private void ApplyDashForce()
+    {
+        rb.linearVelocity = new Vector2(dashDirection.x * force, rb.linearVelocity.y * verticalVelocityRetention);
+    }
+
+    private bool IsObstacleAhead()
+    {
+        return Physics2D.Raycast(transform.position, dashDirection, obstacleDetectionDistance, obstacleLayer);
+    }
+
+    private void EndDash()
+    {
         isDashing = false;
         PlayerEvent.DashChanged(isDashing);
 
-        rb.gravityScale = originalGravity;
+        rb.gravityScale = originalGravityScale;
         rb.linearVelocity = new Vector2(rb.linearVelocity.x * endDashVelocityMultiplier, rb.linearVelocity.y);
+    }
 
-        lastDashTime = Time.time;
+    private Vector2 GetDashDirection()
+    {
+        if (TryGetComponent(out IDirectionable directionable))
+        {
+            return directionable.GetFacingDirection();
+        }
+        return transform.right;
     }
 
     private void HandleGrounded(bool isGrounded)
@@ -101,7 +126,7 @@ public class PlayerDash : MonoBehaviour
         if (isDashing)
         {
             Gizmos.color = Color.blue;
-            Gizmos.DrawRay(transform.position, direction * 0.5f);
+            Gizmos.DrawRay(transform.position, dashDirection * 0.5f);
         }
     }
 }

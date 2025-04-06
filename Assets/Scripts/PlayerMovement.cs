@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -13,6 +14,9 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
 
     private float moveInput;
     private float currentSpeed;
+
+    private float currentDirection;
+    private float lastDirection = 1;
 
     private bool isDashing;
 
@@ -65,9 +69,24 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
         }
 
-        float direction = moveInput != 0 ? Mathf.Sign(moveInput) : 0;
-        float horizontalSpeed = currentSpeed * direction;
+        UpdateDirection();
+
+        float horizontalSpeed = currentSpeed * currentDirection;
         rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);
+    }
+
+    private void UpdateDirection()
+    {
+        if (moveInput != 0)
+        {
+            currentDirection = Mathf.Sign(moveInput);
+        }
+
+        else
+        {
+            if (currentDirection != 0) lastDirection = currentDirection;
+            currentDirection = 0;
+        }
     }
 
     private void HandleDash(bool isDashing)
@@ -77,6 +96,7 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
 
     public Vector2 GetFacingDirection()
     {
-        return new Vector2(moveInput, 0f);
+        float xDirection = currentDirection != 0 ? currentDirection : lastDirection;
+        return new Vector2 (xDirection, 0f);
     }
 }

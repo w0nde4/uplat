@@ -10,6 +10,7 @@ public class BAttackStrategy : AttackStrategy
     [SerializeField] private int projectileDamageMultiplier = 1;
     [SerializeField] private bool piercing = false;
     [SerializeField] private int maxPierceCount = 3;
+    [SerializeField] private Vector3 offset;
 
     private float lastAttackTime = -100f;
 
@@ -21,7 +22,8 @@ public class BAttackStrategy : AttackStrategy
 
         Vector2 direction = GetAttackerDirection(attacker);
 
-        Vector3 instantiatePosition = new Vector3(attacker.transform.position.x, attacker.transform.position.y + 1, 0) + (Vector3)direction * 0.5f;
+        var attackerPosition = attacker.transform.position;
+        Vector3 instantiatePosition = new Vector3(attackerPosition.x, attackerPosition.y) + offset;
 
         GameObject projectile = Instantiate(
             projectilePrefab,
@@ -32,7 +34,6 @@ public class BAttackStrategy : AttackStrategy
         Projectile projectileController = projectile.GetComponent<Projectile>();
         if (projectileController != null)
         {
-            Debug.Log(projectile + " initialized!");
             projectileController.Initialize(
                 attacker,
                 direction,
@@ -49,7 +50,7 @@ public class BAttackStrategy : AttackStrategy
             Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                Debug.Log(projectile + " initialized!");
+                Debug.Log(projectile + " initialized! (rb)");
                 rb.linearVelocity = direction * projectileSpeed;
             }
             else Debug.Log("Cant initialize projectile: " + projectile);
@@ -60,7 +61,9 @@ public class BAttackStrategy : AttackStrategy
     {
         IDirectionable directionable = attacker.GetComponent<IDirectionable>();
         if (directionable != null)
+        {
             return directionable.GetFacingDirection();
+        }
 
         return attacker.transform.right;
     }
