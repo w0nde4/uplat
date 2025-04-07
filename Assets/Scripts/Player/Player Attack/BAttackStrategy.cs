@@ -6,7 +6,6 @@ public class BAttackStrategy : AttackStrategy
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float projectileLifetime = 3f;
-    [SerializeField] private float cooldownTime = 1.5f;
     [SerializeField] private int projectileDamageMultiplier = 1;
     [SerializeField] private bool piercing = false;
     [SerializeField] private int maxPierceCount = 3;
@@ -14,11 +13,11 @@ public class BAttackStrategy : AttackStrategy
 
     private float lastAttackTime = -100f;
 
-    public override void PerformAttack(GameObject attacker, FSMState state, int comboStep)
+    public override void PerformAttack(GameObject attacker)
     { 
         lastAttackTime = Time.time;
 
-        int damage = CalculateDamage(state, comboStep);
+        int damage = CalculateDamage();
 
         Vector2 direction = GetAttackerDirection(attacker);
 
@@ -31,16 +30,21 @@ public class BAttackStrategy : AttackStrategy
             Quaternion.identity
         );
 
-        Projectile projectileController = projectile.GetComponent<Projectile>();
+        if (projectile == null) return;
+
+        StandartProjectile projectileController = projectile.GetComponent<StandartProjectile>();
         if (projectileController != null)
         {
             projectileController.Initialize(
                 attacker,
                 direction,
                 projectileSpeed,
-                damage,
                 projectileLifetime,
-                targetLayer,
+                targetLayer
+            );
+            projectileController.SetupExtra(
+                attackRange,
+                damage,
                 piercing,
                 maxPierceCount
             );
@@ -50,10 +54,8 @@ public class BAttackStrategy : AttackStrategy
             Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                Debug.Log(projectile + " initialized! (rb)");
                 rb.linearVelocity = direction * projectileSpeed;
             }
-            else Debug.Log("Cant initialize projectile: " + projectile);
         }
     }
 
@@ -68,15 +70,8 @@ public class BAttackStrategy : AttackStrategy
         return attacker.transform.right;
     }
 
-    public override int CalculateDamage(FSMState state, int comboStep)
+    public override int CalculateDamage()
     {
-        int baseDamageCalculation = base.CalculateDamage(state, comboStep);
-
-        return baseDamageCalculation * projectileDamageMultiplier;
-    }
-
-    public override float GetAttackRange()
-    {
-        return attackRange * 5f; 
+        return baseDamage * projectileDamageMultiplier;
     }
 }

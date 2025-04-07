@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Analytics;
 
@@ -16,7 +17,7 @@ public abstract class SmokeAbility : ScriptableObject
     [SerializeField] protected Color smokeColor = Color.gray;
     [SerializeField] protected float effectDuration = 1.0f;
 
-    protected float lastUseTime = -100f;
+    protected float lastUseTime;
 
     /// <summary>
     /// Checks if the ability can be used based on available smoke and cooldown
@@ -35,7 +36,7 @@ public abstract class SmokeAbility : ScriptableObject
     /// <returns>Amount of smoke consumed</returns>
     public virtual float Use(GameObject user)
     {
-        if(CanUse(GetSmokeAmount(user)))
+        if (CanUse(GetSmokeAmount(user)))
         {
             lastUseTime = Time.time;
             PerformAbility(user);
@@ -52,7 +53,7 @@ public abstract class SmokeAbility : ScriptableObject
     {
         if (smokeEffectPrefab != null)
         {
-            GameObject effect = GameObject.Instantiate(
+            GameObject effect = Instantiate(
                 smokeEffectPrefab,
                 user.transform.position,
                 Quaternion.identity
@@ -63,7 +64,7 @@ public abstract class SmokeAbility : ScriptableObject
                 renderer.material.color = smokeColor;
             }
 
-            GameObject.Destroy(effect, effectDuration);
+            Destroy(effect, effectDuration);
         }
     }
     /// <summary>

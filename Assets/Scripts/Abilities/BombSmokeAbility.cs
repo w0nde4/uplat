@@ -11,6 +11,7 @@ public class BombSmokeAbility : SmokeAbility
     [SerializeField] private float damageTickTime = 0.5f;
     [SerializeField] private float smokeCloudDuration = 3f;
     [SerializeField] private LayerMask targetLayer;
+    [SerializeField] private Vector3 offset;
 
     [Header("Bomb Visuals")]
     [SerializeField] private GameObject smokeBombPrefab;
@@ -29,23 +30,28 @@ public class BombSmokeAbility : SmokeAbility
             throwDirection = directionable.GetFacingDirection();
         }
 
+        var userPosition = user.transform.position;
+        Vector3 instantiatePosition = userPosition + new Vector3(throwDirection.x, throwDirection.y, 0) * 0.5f + offset;
         GameObject smokeBomb = Instantiate(
             smokeBombPrefab,
-            user.transform.position + new Vector3(throwDirection.x, throwDirection.y, 0) * 0.5f,
+            instantiatePosition,
             Quaternion.identity
         );
 
-        BombSmokeProjectile bombProjectile = smokeBomb.AddComponent<BombSmokeProjectile>();
+        BombSmokeProjectile bombProjectile = smokeBomb.GetComponent<BombSmokeProjectile>();
         bombProjectile.Initialize(
             user,
             throwDirection,
             throwSpeed,
+            smokeCloudDuration + 0.5f,
+            targetLayer
+        );
+        bombProjectile.SetupExtra(
             throwDistance,
             explosionRadius,
             damage,
             damageTickTime,
             smokeCloudDuration,
-            targetLayer,
             smokeBombExplosionPrefab,
             smokeColor
         );

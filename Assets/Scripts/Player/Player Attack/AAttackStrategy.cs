@@ -1,35 +1,56 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AAttack", menuName = "Attack Strategies/A")]
 public class AAttackStrategy : AttackStrategy
 {
-    [SerializeField] private float highHpDamageMult = 1.2f;
-    [SerializeField] private float lowHpDamageMult = 0.8f;
-    public override void PerformAttack(GameObject attacker, FSMState state, int comboStep)
+    [SerializeField] private int maxComboStep = 3;
+    [SerializeField] private float comboResetTime = 1.5f;
+    
+    private int currentComboStep = 0;
+    private float timeSinceLastAttack = 0f;
+
+    public override bool SupportsCombo() => true;
+
+    public override void PerformAttack(GameObject attacker)
     {
-        var damage = CalculateDamage(state, comboStep);
+        var damage = CalculateDamage();
         var attackerPosition = attacker.transform.position;
+
         foreach(var enemy in GetAttackedEnemies(attackerPosition))
         {
             ApplyDamage(enemy.gameObject, attacker, damage);
         }
+
+        OnComboPerformed();
+        timeSinceLastAttack = 0f;
     }
 
-    public override int CalculateDamage(FSMState state, int comboStep)
+    public override int CalculateDamage()
     {
-        float stateMult = 1.0f;
+        float comboMult = 1.0f + (currentComboStep * 0.2f);
+        return Mathf.RoundToInt(baseDamage * comboMult);
+    }
+    public override void OnComboPerformed()
+    {
+        PlayerEvent.AttackStarted(currentComboStep);
+        currentComboStep = (currentComboStep + 1) % maxComboStep;
+    }
 
-        switch(state)
+    public override void OnComboReset()
+    {
+        currentComboStep = 0;
+    }
+
+    public override int GetComboStep() => currentComboStep;
+
+    public override void UpdateStrategy(float deltaTime)
+    {
+        timeSinceLastAttack += deltaTime;
+        if(timeSinceLastAttack >= comboResetTime && currentComboStep != 0)
         {
-            case HighHPState:
-                stateMult = highHpDamageMult;
-                break;
-            case LowHPState:
-                stateMult = lowHpDamageMult;
-                break;
+            OnComboReset();
+            PlayerEvent.AttackEnded();
         }
-
-        float comboMult = 1.0f + (comboStep * 0.2f);
-        return Mathf.RoundToInt(baseDamage * stateMult * comboMult);
     }
 }

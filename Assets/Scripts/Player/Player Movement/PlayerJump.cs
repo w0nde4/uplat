@@ -1,47 +1,106 @@
+using System;
 using UnityEngine;
+
+enum GroundRayDirections
+{
+    Left,
+    Right,
+    Center
+}
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerJump : MonoBehaviour
 {
     [Header("Jump Settings")]
-    [SerializeField] private float jumpHeight = 5f;
-    [SerializeField] private float jumpTime = 0.35f; 
-    [SerializeField] private float coyoteTime = 0.15f; 
-    [SerializeField] private float jumpBufferTime = 0.2f; 
+    [SerializeField] private float maxJumpHeight = 4f;
+    [SerializeField] private float jumpTimeToApex = 0.4f;
+    [SerializeField] private float jumpApexHoldTime = 0.1f;
+    [SerializeField] private float maxFallSpeed = -20f;
+
+    [Header("Special Jump Features")]
+    [SerializeField] private float coyoteTime = 0.15f;
+    [SerializeField] private float jumpBufferTime = 0.2f;
+    [SerializeField] private float jumpCancelGravityMultiplier = 2.5f;
 
     [Header("Gravity Settings")]
-    [SerializeField] private float gravityScale = 6f;
-    [SerializeField] private float fallGravityMultiplier = 1.5f; 
-    [SerializeField] private float apexGravityMultiplier = 0.5f; 
-    [SerializeField] private float apexVelocityThreshold = 0.1f;
-    [SerializeField] private float fallingVelocityThreshold = -0.5f;
-
-    [Header("Jump Cancel")]
-    [SerializeField] private float cancelRate = 100f; 
-
-    [Header("Fall Settings")]
-    [SerializeField] private float fallClamp = 10f;
+    [SerializeField] private float jumpGravityMultiplier = 0.5f;
+    [SerializeField] private float fallGravityMultiplier = 2.0f;
 
     [Header("Ground Check")]
-    [SerializeField] private float rayWidth;
+    [SerializeField] private float rayWidth = 0.8f;
+    [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float groundCheckDistance = 0.2f; 
+
+    private float jumpForce;
+    private float gravityValue;
+
+    private bool isJumping = false;
+    private bool isFalling = false;
+    private bool isGrounded = false;
+    private bool jumpCancelled = false;
+    private bool isAtApex = false;
+    private bool isDashing;
+
+    private float lastGroundedTime = 0f;
+    private float lastJumpPressedTime = 0f;
+    private float apexTimer = 0f;
 
     private Rigidbody2D rb;
 
-    private bool isJumping;
-    private bool isJumpCancelled;
-    private bool isGrounded;
-    private bool isDashing;
-
-    private float jumpTimeCounter;
-    private float lastGroundedTime;
-    private float lastJumpPressedTime;
-
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = gravityScale;
+        gravityValue = -(2 * maxJumpHeight) / Mathf.Pow(jumpTimeToApex, 2);
+        jumpForce = Mathf.Abs(gravityValue) * jumpTimeToApex;
+        rb.gravityScale = 0f;
+    }
+
+    private void Update()
+    {
+        UpdateStartParameters();
+        if(!isDashing)
+        {
+            CheckGrounded();
+            HandleJumpInput();
+            UpdateTimers();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!isDashing)
+        {
+            ApplyGravity();
+            HandleJump();
+        }
+    }
+
+    private void HandleJump()
+    {
+        bool canJump = Time.time - lastGroundedTime <= coyoteTime;
+        bool wantsToJump = Time.time - lastJumpPressedTime <= jumpBufferTime;
+
+        if (canJump && wantsToJump && !isJumping)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            isJumping = true;
+            isFalling = false;
+
+            lastJumpPressedTime = 0f;
+        }
+
+        if (isJumping && !isFalling && !isAtApex && Mathf.Abs(rb.linearVelocity.y) < 0.1f)
+        {
+            isAtApex = true;
+            apexTimer = 0f;
+        }
+
+        if(isJumping && rb.linearVelocity.y < 0 && !isAtApex)
+        {
+            isJumping = false;
+            isFalling = true;
+        }
+
     }
 
     private void OnEnable()
@@ -54,41 +113,87 @@ public class PlayerJump : MonoBehaviour
         PlayerEvent.OnDashChanged -= HandleDash;
     }
 
-    void Update()
-    {
-        if(!isDashing)
-        {
-            CheckGround();
-            HandleJumpInput();
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (!isDashing)
-        {
-            ApplyJump();
-            ApplyFallPhysics();
-            ApplyApexModifiers();
-        }
-    }
-
     private void HandleDash(bool isDashing)
     {
         this.isDashing = isDashing;
     }
 
-    private void CheckGround()
+    private void HandleJumpInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            lastJumpPressedTime = Time.time;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space) && isJumping && !isFalling)
+        {
+            jumpCancelled = true;
+        }
+    }
+
+    private void UpdateStartParameters()
+    {
+        gravityValue = -(2 * maxJumpHeight) / Mathf.Pow(jumpTimeToApex, 2);
+        jumpForce = Mathf.Abs(gravityValue) * jumpTimeToApex;
+    }
+
+    private void ApplyGravity()
+    {
+        float gravityScale = 1f;
+
+        if (isAtApex)
+        {
+            gravityScale = 0f;
+        }
+
+        else if (isJumping && !isFalling && !jumpCancelled)
+        {
+            gravityScale = jumpGravityMultiplier;
+        }
+
+        else if (jumpCancelled)
+        {
+            gravityScale = jumpCancelGravityMultiplier;
+        }
+
+        else if (isFalling || rb.linearVelocity.y < 0)
+        {
+            gravityScale = fallGravityMultiplier;
+
+        }
+
+        if (rb.linearVelocity.y < maxFallSpeed)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
+        }
+
+        rb.linearVelocity += Vector2.up * gravityValue * gravityScale * Time.fixedDeltaTime;
+    }
+
+    private void UpdateTimers()
+    {
+        if (isAtApex)
+        {
+            apexTimer += Time.deltaTime;
+            if (apexTimer >= jumpApexHoldTime)
+            {
+                isAtApex = false;
+                apexTimer = 0;
+            }
+        }
+    }
+
+    private void CheckGrounded()
     {
         bool wasGrounded = isGrounded;
-        
+
         float width = GetComponent<Collider2D>().bounds.size.x * rayWidth;
 
         var leftHit = CastGroundRay(width, GroundRayDirections.Left).collider;
         var rightHit = CastGroundRay(width, GroundRayDirections.Right).collider;
         var centerHit = CastGroundRay(width, GroundRayDirections.Center).collider;
 
-        isGrounded = leftHit != null || rightHit != null || centerHit != null;
+        isGrounded = leftHit || rightHit || centerHit;
 
         if (wasGrounded != isGrounded)
         {
@@ -99,22 +204,17 @@ public class PlayerJump : MonoBehaviour
         {
             lastGroundedTime = Time.time;
             isJumping = false;
+            isFalling = false;
+            jumpCancelled = false;
         }
-    }
-
-    enum GroundRayDirections
-    {
-        Left,
-        Right,
-        Center
     }
 
     private RaycastHit2D CastGroundRay(float width, GroundRayDirections direction)
     {
         RaycastHit2D hit;
-        Vector3 offset = Vector3.zero; 
+        Vector3 offset = Vector3.zero;
 
-        switch(direction)
+        switch (direction)
         {
             case GroundRayDirections.Left:
                 offset = -new Vector3(width / 2, 0);
@@ -133,87 +233,17 @@ public class PlayerJump : MonoBehaviour
         return hit;
     }
 
-    private void HandleJumpInput()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            lastJumpPressedTime = Time.time;
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            isJumpCancelled = true;
-        }
-    }
-
-    private void ApplyJump()
-    {
-        float jumpForce = Mathf.Sqrt(jumpHeight * -2 * (Physics2D.gravity.y * rb.gravityScale));
-        if (Time.time - lastGroundedTime <= coyoteTime && Time.time - lastJumpPressedTime <= jumpBufferTime)
-        {
-            PerformJump(jumpForce);
-            lastJumpPressedTime = 0;
-        }
-
-        if (isJumping && jumpTimeCounter > 0)
-        {
-            if (Input.GetKey(KeyCode.Space))
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                jumpTimeCounter -= Time.fixedDeltaTime;
-            }
-            else
-            {
-                isJumping = false;
-            }
-        }
-    }
-
-    private void PerformJump(float jumpForce)
-    {
-        isJumpCancelled = false;
-        
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-
-        isJumping = true;
-        jumpTimeCounter = jumpTime;
-    }
-
-    private void ApplyFallPhysics()
-    {
-        if (rb.linearVelocity.y < fallingVelocityThreshold)
-        {
-            rb.gravityScale = gravityScale * fallGravityMultiplier;
-        }
-        else if (isJumpCancelled && isJumping)
-        {
-            rb.gravityScale = gravityScale * cancelRate * Time.deltaTime;
-        }
-        else
-        {
-            rb.gravityScale = gravityScale;
-        }
-
-        if (rb.linearVelocity.y < -fallClamp)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -fallClamp);
-        }
-    }
-
-    private void ApplyApexModifiers()
-    {
-        if (isJumping && Mathf.Abs(rb.linearVelocity.y) < apexVelocityThreshold)
-        {
-            rb.gravityScale = gravityScale * apexGravityMultiplier;
-        }
-    }
-
     private void OnDrawGizmos()
     {
+        if(!Application.isPlaying) return;
+
+        float width = GetComponent<Collider2D>().bounds.size.x * rayWidth;
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + Vector3.down + new Vector3(rayWidth/2,0) * groundCheckDistance);
-        Gizmos.DrawLine(transform.position, transform.position + Vector3.down - new Vector3(rayWidth / 2, 0) * groundCheckDistance);
-        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
+        Gizmos.DrawLine(transform.position - new Vector3(width / 2, 0),
+                        transform.position - new Vector3(width / 2, 0) + Vector3.down * groundCheckDistance);
+        Gizmos.DrawLine(transform.position,
+                         transform.position + Vector3.down * groundCheckDistance);
+        Gizmos.DrawLine(transform.position + new Vector3(width / 2, 0),
+                         transform.position + new Vector3(width / 2, 0) + Vector3.down * groundCheckDistance);
     }
 }

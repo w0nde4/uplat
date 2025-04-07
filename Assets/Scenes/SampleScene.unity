@@ -937,10 +937,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.002302379
-    y: 0.002728513
-    width: 0.9946278
-    height: 0.9931787
+    x: 0
+    y: 0.0020920502
+    width: 0.99917287
+    height: 0.9958159
   near clip plane: 0.1
   far clip plane: 5000
   field of view: 40
@@ -2935,9 +2935,9 @@ RectTransform:
   - {fileID: 1791647056}
   m_Father: {fileID: 1283719671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -560.6, y: 322.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 90.900024, y: -46.100006}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1625235849
@@ -3264,6 +3264,7 @@ GameObject:
   - component: {fileID: 1818567918}
   - component: {fileID: 1818567917}
   - component: {fileID: 1818567916}
+  - component: {fileID: 1818567926}
   - component: {fileID: 1818567921}
   - component: {fileID: 1818567920}
   - component: {fileID: 1818567924}
@@ -3271,8 +3272,6 @@ GameObject:
   - component: {fileID: 1818567927}
   - component: {fileID: 1818567929}
   - component: {fileID: 1818567928}
-  - component: {fileID: 1818567926}
-  - component: {fileID: 1818567930}
   - component: {fileID: 1818567931}
   m_Layer: 10
   m_Name: Player
@@ -3443,22 +3442,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b41136799fe0444abb427c78a78dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 2.5
-  jumpTime: 0.2
+  maxJumpHeight: 6
+  jumpTimeToApex: 0.45
+  jumpApexHoldTime: 0.05
+  maxFallSpeed: -20
   coyoteTime: 0.2
   jumpBufferTime: 0.2
-  gravityScale: 9
-  fallGravityMultiplier: 1.05
-  apexGravityMultiplier: 0.4
-  apexVelocityThreshold: 0.1
-  fallingVelocityThreshold: -0.5
-  cancelRate: 100
-  fallClamp: 25
+  jumpCancelGravityMultiplier: 2.5
+  jumpGravityMultiplier: 1
+  fallGravityMultiplier: 2
   rayWidth: 0.6
+  groundCheckDistance: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  groundCheckDistance: 0.2
 --- !u!114 &1818567924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3472,11 +3469,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackStrategy: {fileID: 11400000, guid: f949ae6cf895777448e6c2a061865a2b, type: 2}
-  comboResetTime: 1
-  maxComboSteps: 3
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 512
 --- !u!114 &1818567925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3561,19 +3553,6 @@ MonoBehaviour:
   maxHealth: 100
   isInvulnerableAfterHit: 1
   invulnerabilityDuration: 0.5
---- !u!114 &1818567930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1818567915}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 861d04579a234cc4e80a892dbd6bf688, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lowHPThreshold: 0.5
 --- !u!114 &1818567931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3627,10 +3606,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1283719671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -432.34, y: 322.5}
-  m_SizeDelta: {x: 82.486, y: 20}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 218.66006, y: -46.100006}
+  m_SizeDelta: {x: 82.48602, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1850275989
 MonoBehaviour:

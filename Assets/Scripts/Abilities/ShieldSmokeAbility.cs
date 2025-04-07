@@ -5,7 +5,7 @@ public class ShieldSmokeAbility : SmokeAbility
 {
     [Header("Shield Properties")]
     [SerializeField] private float shieldDuration = 5f;
-    [SerializeField] private float damageReduction = 0.5f; // 50% damage reduction
+    [SerializeField] private float damageReduction = 0.5f;
     [SerializeField] private float shieldRadius = 1.5f;
     [SerializeField] private float rotationSpeed = 90f;
 
@@ -13,7 +13,6 @@ public class ShieldSmokeAbility : SmokeAbility
     {
         base.PerformAbility(user);
 
-        // Add shield effect
         ShieldSmokeEffect shieldEffect = user.GetComponent<ShieldSmokeEffect>();
 
         if (shieldEffect == null)

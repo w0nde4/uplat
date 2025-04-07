@@ -61,6 +61,7 @@ public class Smoke : MonoBehaviour
         {
             if (Input.GetKeyDown(abilityKeys[i]))
             {
+                Debug.Log($"Pressed {abilityKeys[i]} for ability {abilities[i]?.name}");
                 UseAbility(abilities[i]);
             }
         }

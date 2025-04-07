@@ -6,13 +6,9 @@ public abstract class AttackStrategy : ScriptableObject
     [SerializeField] protected float attackRange = 1.5f;
     [SerializeField] protected LayerMask targetLayer;
 
-    public abstract void PerformAttack(GameObject attacker, FSMState state, int comboStep);
+    public abstract void PerformAttack(GameObject attacker);
 
-    public virtual int CalculateDamage(FSMState state, int comboStep)
-    {
-        float comboMultiplier = 1.0f + (comboStep * 0.2f);
-        return Mathf.RoundToInt(baseDamage * comboMultiplier);
-    }
+    public abstract int CalculateDamage();
 
     public virtual void ApplyDamage(GameObject target, GameObject attacker, int damage)
     {
@@ -25,18 +21,18 @@ public abstract class AttackStrategy : ScriptableObject
         }
     }
 
-    public virtual Collider2D[] GetAttackedEnemies(Vector2 attackerPosition)
+    public virtual Collider2D[] GetAttackedEnemies(Vector2 attackPosition)
     {
-        if (attackerPosition == null) return null;
+        if (attackPosition == null) return null;
 
-        float attackRange = GetAttackRange();
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackerPosition, attackRange, targetLayer);
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPosition, attackRange, targetLayer);
         Debug.Log("Найдено врагов: " + hitEnemies.Length);
         return hitEnemies;
     }
 
-    public virtual float GetAttackRange()
-    {
-        return attackRange;
-    }
+    public virtual bool SupportsCombo() => false;
+    public virtual void OnComboReset() { }
+    public virtual void OnComboPerformed() { }
+    public virtual int GetComboStep() => 0;
+    public virtual void UpdateStrategy(float deltaTime) { }
 }
