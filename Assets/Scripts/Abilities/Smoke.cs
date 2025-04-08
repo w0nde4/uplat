@@ -13,8 +13,7 @@ public class Smoke : MonoBehaviour
 
     [Header("Abilities")]
     [SerializeField] private List<SmokeAbility> abilities = new List<SmokeAbility>();
-    [SerializeField]
-    private KeyCode[] abilityKeys = new KeyCode[4] {
+    [SerializeField] private KeyCode[] abilityKeys = new KeyCode[4] {
         KeyCode.Q, KeyCode.E, KeyCode.R, KeyCode.F
     };
 
@@ -41,6 +40,11 @@ public class Smoke : MonoBehaviour
     private void Start()
     {
         OnSmokeChanged?.Invoke(currentSmokeAmount, maximumSmokeAmount);
+
+        foreach (var ability in abilities)
+        {
+            ability.ResetCooldown();
+        }
     }
 
     private void Update()

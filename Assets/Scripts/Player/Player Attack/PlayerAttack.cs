@@ -1,29 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    [SerializeField] private AttackStrategy attackStrategy;
+    [SerializeField] private AttackStrategy[] attackStrategies;
+
+    private int currentIndex = 0;
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
-            PerformAttackSequence();
+            PerformAttack();
         }
 
-        attackStrategy?.UpdateStrategy(Time.deltaTime);
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            SwitchAttackStrategy();
+        }
+
+        attackStrategies[currentIndex]?.UpdateStrategy(Time.deltaTime);
     }
 
-    private void PerformAttackSequence()
+    private void SwitchAttackStrategy()
     {
-        if (attackStrategy == null)
-        {
-            Debug.LogWarning("Ќе назначена стратеги€ атаки или нет состо€ни€!");
-            return;
-        }
+        currentIndex = (currentIndex + 1) % attackStrategies.Length;
+    }
 
-        attackStrategy.PerformAttack(gameObject);
+    private void PerformAttack()
+    {
+        attackStrategies[currentIndex]?.PerformAttack(gameObject);
     }
 }

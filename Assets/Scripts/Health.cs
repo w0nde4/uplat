@@ -18,7 +18,9 @@ public class Health : MonoBehaviour, IDamagable
     public event Action<GameObject> OnDamageTaken;
     public event Action OnDeath;
 
-    private void Start()
+    public event Func<int, GameObject, int> OnModifyDamage;
+
+    private void Awake()
     {
         currentHealth = maxHealth;
     }
@@ -52,9 +54,9 @@ public class Health : MonoBehaviour, IDamagable
         if (isInvulnerable || damage <= 0 || !IsAlive())
             return;
 
-        if (damage < 0)
+        if(OnModifyDamage != null)
         {
-            throw new System.ArgumentOutOfRangeException("Negative damage");
+            damage = OnModifyDamage.Invoke(damage, damager);
         }
 
         currentHealth -= damage;

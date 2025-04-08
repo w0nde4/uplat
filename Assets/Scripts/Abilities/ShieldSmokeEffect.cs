@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShieldSmokeEffect : MonoBehaviour
 {
@@ -42,15 +42,17 @@ public class ShieldSmokeEffect : MonoBehaviour
 
         if (health != null)
         {
-            health.OnDamageTaken += ReduceDamage;
+            health.OnModifyDamage += ApplyDamageReduction;
         }
 
         StartCoroutine(ShieldTimer());
     }
 
-    private void ReduceDamage(GameObject damager)
+    private int ApplyDamageReduction(int baseDamage, GameObject damager)
     {
-        Debug.Log($"Shield reduced damage from {damager.name}");
+        int reducedDamage = Mathf.CeilToInt(baseDamage * (1 - damageReduction));
+        Debug.Log($"[Shield] Reduced damage: {baseDamage} → {reducedDamage}"); 
+        return reducedDamage;
     }
 
     private System.Collections.IEnumerator ShieldTimer()
@@ -63,7 +65,7 @@ public class ShieldSmokeEffect : MonoBehaviour
     { 
         if (health != null)
         {
-            health.OnDamageTaken -= ReduceDamage;
+            health.OnModifyDamage -= ApplyDamageReduction;
         }
 
         if (shieldVisual != null)

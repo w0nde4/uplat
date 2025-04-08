@@ -17,7 +17,7 @@ public abstract class SmokeAbility : ScriptableObject
     [SerializeField] protected Color smokeColor = Color.gray;
     [SerializeField] protected float effectDuration = 1.0f;
 
-    protected float lastUseTime;
+    protected float lastUseTime = -100;
 
     /// <summary>
     /// Checks if the ability can be used based on available smoke and cooldown
@@ -44,6 +44,12 @@ public abstract class SmokeAbility : ScriptableObject
         }
         return 0f;
     }
+
+    public void ResetCooldown()
+    {
+        lastUseTime = -cooldownTime;
+    }
+
 
     /// <summary>
     /// Implemented by derived classes to perform the specific ability effect

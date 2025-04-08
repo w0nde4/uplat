@@ -13,27 +13,32 @@ public class HealthUISetter : MonoBehaviour
     private void Awake()
     {
         playerHealth = player.GetComponent<Health>();
+    }
 
-        var maxHealth = playerHealth.MaxHealth;
-        var currentHealth = playerHealth.CurrentHealth;
-        healthSlider.maxValue = maxHealth;
-
-        ChangeHealth(currentHealth, maxHealth);
+    private void Start()
+    {
+        if (playerHealth != null)
+        {
+            UpdateHealthBar(playerHealth.CurrentHealth, playerHealth.MaxHealth);
+        }
     }
 
     private void OnEnable()
     {
-        playerHealth.OnHealthChanged += ChangeHealth;
+        playerHealth.OnHealthChanged += UpdateHealthBar;
     }
 
     private void OnDisable()
     {
-        playerHealth.OnHealthChanged += ChangeHealth;
+        playerHealth.OnHealthChanged += UpdateHealthBar;
     }
 
-    public void ChangeHealth(int currentHealth, int maxHealth)
+    public void UpdateHealthBar(int current, int max)
     {
-        hpTextAmount.text = currentHealth.ToString();
-        healthSlider.value = currentHealth;
+        if (hpTextAmount != null)
+        {
+            hpTextAmount.text = $"{Mathf.Round(current)}/{max}";
+        }
+        healthSlider.value = current;
     }
 }
