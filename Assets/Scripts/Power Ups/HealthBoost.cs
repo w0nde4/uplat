@@ -3,20 +3,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "HealthBoost", menuName = "PowerUp/HealthBoost")]
 public class HealthBoost : PowerUp
 {
-    [SerializeField] private int bonusHealth = 50;
+    [SerializeField] private int healthAmount = 25;
 
-    public override void Use(GameObject user)
+    public override void Use(Player player)
     {
-        var health = user.GetComponent<Health>();
-        if (health == null) return;
-
-        health.Heal(bonusHealth);
-        Debug.Log($"{user.name} received {bonusHealth} bonus health.");
-    }
-
-    public override void PickUp(Player player)
-    {
-        base.PickUp(player);
-        Use(player.gameObject);
+        var health = player.GetComponent<Health>(); //player stats
+        health.Heal(healthAmount);
+        Debug.Log("Boosted by" +  healthAmount);
     }
 }

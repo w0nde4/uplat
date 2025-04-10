@@ -18,7 +18,7 @@ public class EnemyAI : MonoBehaviour
     private EnemyState currentState = EnemyState.Patrol;
 
     private int currentPatrolIndex = 0;
-    private float waypointThreshold = 0.1f;
+    private float waypointThreshold = 1f;
     private Transform player;
     private EnemyCombat combat;
     private Health health;

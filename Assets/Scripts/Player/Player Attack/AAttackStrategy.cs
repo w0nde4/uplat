@@ -14,7 +14,10 @@ public class AAttackStrategy : AttackStrategy
 
     public override void PerformAttack(GameObject attacker)
     {
-        var damage = CalculateDamage();
+        var playerAttack = attacker.GetComponent<PlayerAttack>();
+        var damageMultiplier = playerAttack != null ? playerAttack.DamageMultiplier : 1f;
+        var damage = CalculateDamage(damageMultiplier);
+
         var attackerPosition = attacker.transform.position;
 
         foreach(var enemy in GetAttackedEnemies(attackerPosition))
@@ -26,7 +29,7 @@ public class AAttackStrategy : AttackStrategy
         timeSinceLastAttack = 0f;
     }
 
-    public override int CalculateDamage()
+    public override int CalculateDamage(float damage)
     {
         float comboMult = 1.0f + (currentComboStep * 0.2f);
         return Mathf.RoundToInt(baseDamage * comboMult);

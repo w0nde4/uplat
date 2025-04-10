@@ -7,7 +7,23 @@ public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackStrategy[] attackStrategies;
 
-    private int currentIndex = 0;
+    private float damageMultiplier = 1f;
+
+    public float DamageMultiplier
+    {
+        get
+        {
+            return damageMultiplier;
+        }
+        set
+        {
+            if (value >= 1) damageMultiplier = value;
+            else damageMultiplier = 1f;
+        }
+    }
+
+
+    private int currentStrategyIndex = 0;
 
     private void Update()
     {
@@ -21,16 +37,16 @@ public class PlayerAttack : MonoBehaviour
             SwitchAttackStrategy();
         }
 
-        attackStrategies[currentIndex]?.UpdateStrategy(Time.deltaTime);
+        attackStrategies[currentStrategyIndex]?.UpdateStrategy(Time.deltaTime);
     }
 
     private void SwitchAttackStrategy()
     {
-        currentIndex = (currentIndex + 1) % attackStrategies.Length;
+        currentStrategyIndex = (currentStrategyIndex + 1) % attackStrategies.Length;
     }
 
     private void PerformAttack()
     {
-        attackStrategies[currentIndex]?.PerformAttack(gameObject);
+        attackStrategies[currentStrategyIndex]?.PerformAttack(gameObject);
     }
 }

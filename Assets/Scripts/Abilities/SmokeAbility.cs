@@ -1,12 +1,11 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
-using UnityEngine.Analytics;
 
 /// <summary>
 /// Base class for all smoke-powered abilities
 /// Inherits from the abstract Ability class
 /// </summary>
-public abstract class SmokeAbility : ScriptableObject
+public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
 {
     [Header("Smoke Properties")]
     [SerializeField] protected float smokeCost = 10f;
@@ -16,6 +15,8 @@ public abstract class SmokeAbility : ScriptableObject
     [SerializeField] protected GameObject smokeEffectPrefab;
     [SerializeField] protected Color smokeColor = Color.gray;
     [SerializeField] protected float effectDuration = 1.0f;
+
+    public event Action<GameObject, SmokeAbility, float> OnAbilityUsed;
 
     protected float lastUseTime = -100;
 
@@ -40,10 +41,17 @@ public abstract class SmokeAbility : ScriptableObject
         {
             lastUseTime = Time.time;
             PerformAbility(user);
+            AbilityUsed(user, this, cooldownTime);
             return smokeCost;
         }
         return 0f;
     }
+
+    public void AbilityUsed(GameObject user, SmokeAbility ability, float remainingCooldown)
+    {
+        OnAbilityUsed?.Invoke(user, ability, remainingCooldown);
+    }
+
 
     public void ResetCooldown()
     {

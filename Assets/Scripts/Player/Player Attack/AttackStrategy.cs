@@ -8,7 +8,10 @@ public abstract class AttackStrategy : ScriptableObject
 
     public abstract void PerformAttack(GameObject attacker);
 
-    public abstract int CalculateDamage();
+    public virtual int CalculateDamage(float damageMultiplier)
+    {
+        return Mathf.RoundToInt(baseDamage * damageMultiplier);
+    }
 
     public virtual void ApplyDamage(GameObject target, GameObject attacker, int damage)
     {

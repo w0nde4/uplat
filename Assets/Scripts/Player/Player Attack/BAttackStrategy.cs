@@ -6,7 +6,7 @@ public class BAttackStrategy : AttackStrategy
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float projectileLifetime = 3f;
-    [SerializeField] private int projectileDamageMultiplier = 1;
+    [SerializeField] private float projectileDamageMultiplier = 1;
     [SerializeField] private bool piercing = false;
     [SerializeField] private int maxPierceCount = 3;
     [SerializeField] private Vector3 offset;
@@ -16,8 +16,10 @@ public class BAttackStrategy : AttackStrategy
     public override void PerformAttack(GameObject attacker)
     { 
         lastAttackTime = Time.time;
-
-        int damage = CalculateDamage();
+        
+        var playerAttack = attacker.GetComponent<PlayerAttack>();
+        var damageMultiplier = playerAttack != null ? playerAttack.DamageMultiplier : 1f;
+        var damage = CalculateDamage(damageMultiplier);
 
         Vector2 direction = GetAttackerDirection(attacker);
 
@@ -70,8 +72,8 @@ public class BAttackStrategy : AttackStrategy
         return attacker.transform.right;
     }
 
-    public override int CalculateDamage()
+    public override int CalculateDamage(float damageMultiplier)
     {
-        return baseDamage * projectileDamageMultiplier;
+        return Mathf.RoundToInt(baseDamage * projectileDamageMultiplier * damageMultiplier);
     }
 }

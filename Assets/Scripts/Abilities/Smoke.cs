@@ -7,8 +7,8 @@ public class Smoke : MonoBehaviour
 {
     [Header("Smoke Resource")]
     [SerializeField] private float maximumSmokeAmount = 100f;
-    [SerializeField] private float regenerationTime = 1f;
-    [SerializeField] private float regenerationAmount = 10f;
+    [SerializeField] private float regenerationTime = 0.5f;
+    [SerializeField] private float regenerationAmount = 1f;
     [SerializeField] private float lowSmokeThreshold = 20f;
 
     [Header("Abilities")]
