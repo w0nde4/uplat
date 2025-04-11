@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour, IPowerUpConsumer
 {
     [SerializeField] private int maxSlots = 2;
 
@@ -18,6 +17,9 @@ public class Inventory : MonoBehaviour
     public bool IsFull => powerUps.Count >= maxSlots;
 
     public IReadOnlyList<PowerUpInstance> GetAllPowerUps() => (IReadOnlyList<PowerUpInstance>)powerUps.AsReadOnly();
+
+    public bool CanRecieve(PowerUp powerUp) => !IsFull;
+    public bool TryRecieve(PowerUp powerUp) => AddPowerUp(powerUp);
 
     public bool AddPowerUp(PowerUp powerUp)
     {
