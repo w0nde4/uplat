@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Health : MonoBehaviour, IDamagable
 {
@@ -10,6 +11,29 @@ public class Health : MonoBehaviour, IDamagable
     private int currentHealth;
     private bool isInvulnerable = false;
     private float invulnerabilityTimer = 0f;
+    private float maxHealthMultiplier = 1f;
+
+    public float MaxHealthMultiplier
+    {
+        get
+        {
+            return maxHealthMultiplier;
+        }
+        set
+        {
+            if (value >= 1f)
+            {
+                float oldMultiplier = maxHealthMultiplier;
+                maxHealthMultiplier = value;
+
+                int oldMaxHealth = maxHealth;
+                int newMaxHealth = Mathf.RoundToInt(maxHealth * maxHealthMultiplier);
+                
+                SetMaxHealth(newMaxHealth);
+            }
+            else maxHealthMultiplier = 1f;
+        }
+    }
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
@@ -95,6 +119,31 @@ public class Health : MonoBehaviour, IDamagable
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    private void SetMaxHealth(int newMaxHealth)
+    {
+        if(newMaxHealth <= 0)
+        {
+            Debug.LogError("Attempted to set max health to zero or negative value!");
+            return;
+        }
+
+        int oldMaxHealth = maxHealth;
+        maxHealth = newMaxHealth;
+
+        if (newMaxHealth > oldMaxHealth)
+        {
+            currentHealth += (newMaxHealth - oldMaxHealth);
+        }
+
+        if(IsAlive())
+        {
+            currentHealth = Mathf.Max(1, currentHealth);
+        }
+
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 

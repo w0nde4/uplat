@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AAttack", menuName = "Attack Strategies/A")]
@@ -29,10 +28,10 @@ public class AAttackStrategy : AttackStrategy
         timeSinceLastAttack = 0f;
     }
 
-    public override int CalculateDamage(float damage)
+    public override int CalculateDamage(float damageMultiplier)
     {
         float comboMult = 1.0f + (currentComboStep * 0.2f);
-        return Mathf.RoundToInt(baseDamage * comboMult);
+        return Mathf.RoundToInt(baseDamage * comboMult * damageMultiplier);
     }
     public override void OnComboPerformed()
     {

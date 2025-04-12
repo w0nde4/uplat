@@ -58,6 +58,7 @@ public class Shop : MonoBehaviour
 
             var instanceGO = Instantiate(prefab, GetSpawnPosition(shopItems.IndexOf(item)), Quaternion.identity);
             var instance = instanceGO.GetComponent<PowerUpInstance>();
+
             if (instance == null)
             {
                 Debug.LogError("PowerUp prefab must have PowerUpInstance component");

@@ -7,19 +7,21 @@ public class DamageBoost : PowerUp
 
     private float startDamageMultiplier = 1f;
 
-    public override void Use(Player player)
+    public override void ApplyEffect(Player player)
     {
-        var attack = player.GetComponent<PlayerAttack>();
+        var attack = GetComponent<PlayerAttack>(player);
         if (attack == null) return;
 
-        startDamageMultiplier = attack.DamageMultiplier;
-
-        attack.DamageMultiplier = damageMultiplier;
+        ModifyProperty(attack,
+            a => a.DamageMultiplier,
+            (a, val) => a.DamageMultiplier = val,
+            damageMultiplier,
+            ref startDamageMultiplier);
     }
 
     public override void RemoveEffect(Player player)
     {
-        var attack = player.GetComponent<PlayerAttack>();
+        var attack = GetComponent<PlayerAttack>(player);
         if (attack == null) return;
 
         attack.DamageMultiplier = startDamageMultiplier;

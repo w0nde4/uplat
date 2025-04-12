@@ -1674,7 +1674,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4002891118676731322, guid: d9eee6f3224501b4291d35d8389a907d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7496419793282566808, guid: d9eee6f3224501b4291d35d8389a907d, type: 3}
       propertyPath: m_Sprite
@@ -1830,6 +1830,8 @@ MonoBehaviour:
     price: 10
   - powerUp: {fileID: 11400000, guid: 3994bac8f6bc9b5429d871ce4cf435bf, type: 2}
     price: 10
+  - powerUp: {fileID: 11400000, guid: 9dc20e16e39558b4eb1b9c54545b9a5c, type: 2}
+    price: 15
 --- !u!212 &976544342
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5357,7 +5359,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4002891118676731322, guid: d9eee6f3224501b4291d35d8389a907d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

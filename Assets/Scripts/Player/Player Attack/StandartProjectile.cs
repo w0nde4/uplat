@@ -41,6 +41,7 @@ public class StandartProjectile : Projectile
         if (target.TryGetComponent<IDamagable>(out var damagable))
         {
             damagable.TakeDamage(damage, owner);
+            Debug.Log(target.name + " получил " + damage + " урона.");
             OnProjectileHit?.Invoke(owner, target, damage);
         }
 

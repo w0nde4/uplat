@@ -10,6 +10,21 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
     [SerializeField] private float acceleration = 30f;
     [SerializeField] private float deceleration = 20f;
 
+    private float speedMultiplier = 1f;
+
+    public float SpeedMultiplier
+    {
+        get
+        {
+            return speedMultiplier;
+        }
+        set
+        {
+            if (value >= 1) speedMultiplier = value;
+            else speedMultiplier = 1f;
+        }
+    }
+
     private Rigidbody2D rb;
 
     private float moveInput;
@@ -71,7 +86,7 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
 
         UpdateDirection();
 
-        float horizontalSpeed = currentSpeed * currentDirection;
+        float horizontalSpeed = currentSpeed * currentDirection * speedMultiplier;
         rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);
     }
 

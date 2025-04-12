@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public enum PowerUpContext
@@ -6,7 +7,7 @@ public enum PowerUpContext
     World,
     Shop
 }
-
+[RequireComponent(typeof(Collider2D))]
 public class PowerUpInstance : MonoBehaviour, IInteractible
 {
     [SerializeField] private PowerUp powerUpData;
@@ -17,7 +18,7 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
     private Color originalColor;
     private bool isHighlighted = false;
-
+    bool isOnLayer;
     private Shop shop;
     private IPowerUpInteractionStrategy interactionStrategy;
 
@@ -33,6 +34,11 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
     {
         if (highlightRenderer != null)
             originalColor = highlightRenderer.color;
+
+        if (gameObject.layer != LayerMask.NameToLayer("Interactible"))
+        {
+            Debug.LogWarning("Set layer to interactible");
+        }
 
         if (interactionStrategy == null)
         {

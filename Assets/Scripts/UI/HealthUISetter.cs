@@ -39,6 +39,8 @@ public class HealthUISetter : MonoBehaviour
         {
             hpTextAmount.text = $"{Mathf.Round(current)}/{max}";
         }
+        
+        healthSlider.maxValue = max;
         healthSlider.value = current;
     }
 }
