@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DamageBoost", menuName = "PowerUp/DamageBoost")]
+[CreateAssetMenu(fileName = "DamageBoost", menuName = "PowerUps/Passive/DamageBoost")]
 public class DamageBoost : PowerUp
 {
     [SerializeField] private float damageMultiplier = 1.5f;

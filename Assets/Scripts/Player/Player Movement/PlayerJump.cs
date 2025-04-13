@@ -120,12 +120,12 @@ public class PlayerJump : MonoBehaviour
 
     private void HandleJumpInput()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.W))
         {
             lastJumpPressedTime = Time.time;
         }
 
-        if (Input.GetKeyUp(KeyCode.Space) && isJumping && !isFalling)
+        if (Input.GetKeyUp(KeyCode.W) && isJumping && !isFalling)
         {
             jumpCancelled = true;
         }

@@ -13,7 +13,7 @@ public class ShopPowerUpInteraction : IPowerUpInteractionStrategy
 
     public void Interact(PowerUpInstance powerUpInstance, Player player)
     {
-        if (player.Wallet.TrySpend(item.price))
+        if (player.TryPurchasePowerUp(item))
         {
             if (player.TryAcquirePowerUp(item.powerUp))
             {
@@ -22,7 +22,7 @@ public class ShopPowerUpInteraction : IPowerUpInteractionStrategy
             }
             else
             {
-                player.Wallet.AddMoney(item.price);
+                player.GiveMoneyBack(item);
                 Debug.Log("Inventory full!");
             }
         }

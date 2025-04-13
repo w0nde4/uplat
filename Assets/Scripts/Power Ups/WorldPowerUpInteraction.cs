@@ -4,7 +4,9 @@ public class WorldPowerUpInteraction : IPowerUpInteractionStrategy
 {
     public void Interact(PowerUpInstance powerUpInstance, Player player)
     {
-        if(player.Inventory.AddPowerUp(powerUpInstance.PowerUpData))
+        PowerUp powerUp = powerUpInstance.PowerUpData;
+
+        if(player.TryAcquirePowerUp(powerUp))
         {
             GameObject.Destroy(powerUpInstance.gameObject);
         }

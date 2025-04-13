@@ -2,16 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shop : MonoBehaviour
+public class Shop : MonoBehaviour //separate spawn and storage
 {
-    [SerializeField] private List<ShopItem> shopItems = new List<ShopItem>();
-
-    private int shopItemsCount;
-
-    public event Action<ShopItem> OnItemSold;
-
-    public IReadOnlyList<ShopItem> Items => shopItems;
-
     [Serializable]
     public class ShopItem
     {
@@ -19,11 +11,11 @@ public class Shop : MonoBehaviour
         public int price;
 
         public ShopItem(PowerUp powerUp, int price)
-        { 
-            this.powerUp = powerUp; 
-            this.price = price; 
+        {
+            this.powerUp = powerUp;
+            this.price = price;
         }
-        
+
         public override bool Equals(object obj)
         {
             if (obj is ShopItem other)
@@ -37,6 +29,16 @@ public class Shop : MonoBehaviour
             return powerUp.GetHashCode() ^ price.GetHashCode();
         }
     }
+
+    [SerializeField] private List<ShopItem> shopItems = new List<ShopItem>();
+    
+    private int shopItemsCount;
+
+    public event Action<ShopItem> OnItemSold;
+
+    public IReadOnlyList<ShopItem> Items => shopItems;
+
+    
 
     private void Awake()
     {

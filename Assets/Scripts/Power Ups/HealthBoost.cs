@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "HealthBoost", menuName = "PowerUp/HealthBoost")]
+[CreateAssetMenu(fileName = "HealthBoost", menuName = "PowerUps/Passive/HealthBoost")]
 public class HealthBoost : PowerUp
 {
     [SerializeField] private int healthAmount = 25;

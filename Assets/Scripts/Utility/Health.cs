@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,9 +10,8 @@ public class Health : MonoBehaviour, IDamagable
     [SerializeField] private float invulnerabilityDuration = 0.5f;
 
     private int currentHealth;
-    private bool isInvulnerable = false;
-    private float invulnerabilityTimer = 0f;
     private float maxHealthMultiplier = 1f;
+    private int invulnerabilitySources = 0;
 
     public float MaxHealthMultiplier
     {
@@ -38,6 +38,8 @@ public class Health : MonoBehaviour, IDamagable
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
 
+    public bool IsInvulnerable => invulnerabilitySources > 0;
+
     public event Action<int, int> OnHealthChanged; 
     public event Action<GameObject> OnDamageTaken;
     public event Action OnDeath;
@@ -51,15 +53,6 @@ public class Health : MonoBehaviour, IDamagable
 
     private void Update()
     {
-        if (isInvulnerable)
-        {
-            invulnerabilityTimer -= Time.deltaTime;
-            if (invulnerabilityTimer <= 0)
-            {
-                isInvulnerable = false;
-            }
-        }
-
         if (Debug.isDebugBuild && CompareTag("Player"))
         {
             if (Input.GetKeyUp(KeyCode.DownArrow))
@@ -75,7 +68,7 @@ public class Health : MonoBehaviour, IDamagable
 
     public void TakeDamage(int damage, GameObject damager)
     {
-        if (isInvulnerable || damage <= 0 || !IsAlive())
+        if (IsInvulnerable || damage <= 0 || !IsAlive())
             return;
 
         if(OnModifyDamage != null)
@@ -91,14 +84,20 @@ public class Health : MonoBehaviour, IDamagable
 
         if (isInvulnerableAfterHit)
         {
-            isInvulnerable = true;
-            invulnerabilityTimer = invulnerabilityDuration;
+            AddInvulnerabilitySource();
+            StartCoroutine(RemoveInvulnerabilityAfterDelay(invulnerabilityDuration));
         }
 
         if (currentHealth <= 0)
         {
             Die();
         }
+    }
+
+    private IEnumerator RemoveInvulnerabilityAfterDelay(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        RemoveInvulnerabilitySource();
     }
 
     public bool IsAlive()
@@ -157,4 +156,8 @@ public class Health : MonoBehaviour, IDamagable
     {
         return (float)currentHealth / maxHealth;
     }
+
+    public void AddInvulnerabilitySource() => invulnerabilitySources++;
+
+    public void RemoveInvulnerabilitySource() => invulnerabilitySources = Mathf.Max(0, invulnerabilitySources - 1);
 }

@@ -18,7 +18,8 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
     private Color originalColor;
     private bool isHighlighted = false;
-    bool isOnLayer;
+    private bool isOnLayer;
+
     private Shop shop;
     private IPowerUpInteractionStrategy interactionStrategy;
 
@@ -37,7 +38,7 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
         if (gameObject.layer != LayerMask.NameToLayer("Interactible"))
         {
-            Debug.LogWarning("Set layer to interactible");
+            Debug.LogError($"Set {gameObject} layer to interactible");
         }
 
         if (interactionStrategy == null)
