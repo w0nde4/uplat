@@ -18,14 +18,13 @@ MonoBehaviour:
   smokeColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   effectDuration: 1
   throwDistance: 10
-  throwSpeed: 5
-  explosionRadius: 3
+  throwSpeed: 7
+  explosionRadius: 10
   damage: 15
-  damageTickTime: 0.5
   smokeCloudDuration: 3
   targetLayer:
     serializedVersion: 2
     m_Bits: 512
-  offset: {x: 0, y: 1, z: 0}
+  offset: {x: 0, y: 2, z: 0}
   smokeBombPrefab: {fileID: 6795514783619623336, guid: 28b383fff2ec897429228750ac4eb7e9, type: 3}
   smokeBombExplosionPrefab: {fileID: 1148100095273426946, guid: 11fac573aa7824f4ab01e53fe6b2e880, type: 3}

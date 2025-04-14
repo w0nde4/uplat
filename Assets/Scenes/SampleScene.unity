@@ -4532,6 +4532,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e0e203800559c7144902ad06637a5647, type: 2}
   - {fileID: 11400000, guid: 914d362ba03ecbe4e8aec9f901b9297b, type: 2}
   abilityKeys: 71000000650000007200000066000000
+  passiveAbility: {fileID: 11400000, guid: 1877ded7e72c51d49b05fa01056d96c7, type: 2}
   smokeBarUI: {fileID: 1581296289}
 --- !u!114 &1818567932
 MonoBehaviour:

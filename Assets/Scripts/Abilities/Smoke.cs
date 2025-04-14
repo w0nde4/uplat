@@ -13,9 +13,12 @@ public class Smoke : MonoBehaviour
 
     [Header("Abilities")]
     [SerializeField] private List<SmokeAbility> abilities = new List<SmokeAbility>();
-    [SerializeField] private KeyCode[] abilityKeys = new KeyCode[4] {
-        KeyCode.Q, KeyCode.E, KeyCode.R, KeyCode.F
+    [SerializeField] private KeyCode[] abilityKeys = new KeyCode[3] {
+        KeyCode.Q, KeyCode.E, KeyCode.R
     };
+
+    [Header("Passive Ability")]
+    [SerializeField] private PassiveSmokeAbility passiveAbility;
 
     [Header("UI References")]
     [SerializeField] private GameObject smokeBarUI;
@@ -26,15 +29,27 @@ public class Smoke : MonoBehaviour
 
     public event Action<float, float> OnSmokeChanged;
     public event Action<SmokeAbility> OnAbilityUsed;
+    public event Action<PassiveSmokeAbility, bool> OnPassiveAbilityStateChanged;
     public event Action OnLowSmoke;
 
     public float CurrentSmokeAmount => currentSmokeAmount;
     public float MaximumSmokeAmount => maximumSmokeAmount;
     public List<SmokeAbility> Abilities => abilities;
+    public PassiveSmokeAbility PassiveAbility => passiveAbility;
 
     private void Awake()
     {
         currentSmokeAmount = maximumSmokeAmount;
+    }
+
+    private void OnEnable()
+    {
+        passiveAbility.OnPassiveStateChanged += HandlePassiveStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        passiveAbility.OnPassiveStateChanged -= HandlePassiveStateChanged;
     }
 
     private void Start()
@@ -45,6 +60,11 @@ public class Smoke : MonoBehaviour
         {
             ability.ResetCooldown();
         }
+    }
+
+    private void HandlePassiveStateChanged(GameObject user, PassiveSmokeAbility ability, bool isActive)
+    {
+        OnPassiveAbilityStateChanged?.Invoke(ability, isActive);
     }
 
     private void Update()
@@ -69,6 +89,8 @@ public class Smoke : MonoBehaviour
                 UseAbility(abilities[i]);
             }
         }
+
+        passiveAbility.UpdatePassiveEffect(gameObject, Time.deltaTime);
 
         if (currentSmokeAmount < maximumSmokeAmount && !isRegenerating)
         {
@@ -160,5 +182,26 @@ public class Smoke : MonoBehaviour
         if (ability == null) return 1f;
 
         return 1f - (ability.RemainingCooldown / ability.CooldownTime);
+    }
+
+    public void AddPassiveAbility(PassiveSmokeAbility newPassive)
+    {
+        if (newPassive == null || passiveAbility == newPassive) return;
+
+        passiveAbility = newPassive;
+        newPassive.OnPassiveStateChanged += HandlePassiveStateChanged;
+    }
+
+    public void RemovePassiveAbility(PassiveSmokeAbility passive)
+    {
+        if (passive == null || passiveAbility != passive) return;
+
+        if (passive.IsActive)
+        {
+            passive.Deactivate(gameObject);
+        }
+
+        passive.OnPassiveStateChanged -= HandlePassiveStateChanged;
+        passiveAbility = null;
     }
 }

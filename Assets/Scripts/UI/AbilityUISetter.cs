@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PowerUpUISetter : MonoBehaviour
+public class AbilityUISetter : MonoBehaviour
 {
     [SerializeField] private Image image;
     [SerializeField] private SmokeAbility trackedAbility;

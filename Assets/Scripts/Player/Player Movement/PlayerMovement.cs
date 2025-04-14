@@ -2,7 +2,7 @@ using System;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent (typeof(Rigidbody2D))]
 [RequireComponent (typeof(SpriteRenderer))]
 public class PlayerMovement : MonoBehaviour, IDirectionable
 {
@@ -11,6 +11,13 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
     [SerializeField] private float deceleration = 20f;
 
     private float speedMultiplier = 1f;
+    private Rigidbody2D rb;
+    private float moveInput;
+    private float currentSpeed;
+    private float currentDirection;
+    private float lastDirection = 1;
+    private bool isDashing;
+    private float previousMoveInput = 0f;
 
     public float SpeedMultiplier
     {
@@ -24,16 +31,6 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
             else speedMultiplier = 1f;
         }
     }
-
-    private Rigidbody2D rb;
-
-    private float moveInput;
-    private float currentSpeed;
-
-    private float currentDirection;
-    private float lastDirection = 1;
-
-    private bool isDashing;
 
     private void OnEnable()
     {
@@ -55,6 +52,7 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
     {
         if (!isDashing)
         {
+            previousMoveInput = moveInput;
             moveInput = Input.GetAxis("Horizontal");
         }
     }
@@ -69,22 +67,33 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
 
     private void ApplyMovement()
     {
-        bool changingDirection = (moveInput > 0 && rb.linearVelocity.x < 0) || (moveInput < 0 && rb.linearVelocity.x > 0);
+        bool abruptDirectionChange = 
+            (previousMoveInput * moveInput < 0) && 
+            (Mathf.Abs(previousMoveInput) > 0.8f) && 
+            (Mathf.Abs(moveInput) > 0.8f);
 
         if (Mathf.Abs(moveInput) > 0.01f)
         {
             float targetSpeed = maxSpeed * MathF.Abs(moveInput);
-            float accelerationRate = changingDirection ? deceleration : acceleration;
 
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accelerationRate * Time.fixedDeltaTime);
+            if(abruptDirectionChange)
+            {
+                currentSpeed = Mathf.Max(currentSpeed, targetSpeed);
+                currentDirection = Mathf.Sign(moveInput);
+            }
+
+            else
+            {
+                currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
+                UpdateDirection();
+            }
         }
 
         else
         {
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+            UpdateDirection();
         }
-
-        UpdateDirection();
 
         float horizontalSpeed = currentSpeed * currentDirection * speedMultiplier;
         rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);

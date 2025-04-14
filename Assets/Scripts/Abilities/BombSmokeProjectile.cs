@@ -6,7 +6,6 @@ public class BombSmokeProjectile : Projectile
     private float maxDistance;
     private float explosionRadius;
     private int damage;
-    private float damageTickTime;
     private float smokeCloudDuration;
     private GameObject explosionPrefab;
     private Color smokeColor;
@@ -15,16 +14,16 @@ public class BombSmokeProjectile : Projectile
     private bool exploded = false;
 
     public void SetupExtra(float maxDistance, float explosionRadius, int damage,
-                           float damageTickTime, float smokeCloudDuration,
-                           GameObject explosionPrefab, Color smokeColor)
+                           float smokeCloudDuration, GameObject explosionPrefab,
+                           Color smokeColor, LayerMask targetLayer)
     {
         this.maxDistance = maxDistance;
         this.explosionRadius = explosionRadius;
         this.damage = damage;
-        this.damageTickTime = damageTickTime;
         this.smokeCloudDuration = smokeCloudDuration;
         this.explosionPrefab = explosionPrefab;
         this.smokeColor = smokeColor;
+        this.targetLayer = targetLayer;
 
         startPosition = transform.position;
     }
@@ -41,7 +40,8 @@ public class BombSmokeProjectile : Projectile
         float distanceTraveled = Vector3.Distance(transform.position, startPosition);
         if (distanceTraveled >= maxDistance)
         {
-            Explode();
+            StartCoroutine(SmokeDecoy());
+            exploded = true;
         }
     }
 
@@ -49,58 +49,72 @@ public class BombSmokeProjectile : Projectile
     {
         if (!exploded)
         {
-            Explode();
+            StartCoroutine(SmokeDecoy());
+            exploded = true;
+        }
+    }
+
+    private IEnumerator SmokeDecoy()
+    {
+        if (TryGetComponent<Renderer>(out var rend)) rend.enabled = false;
+        if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
+
+        yield return new WaitForSeconds(0.5f);
+
+        float timer = 0f;
+
+        while (timer < smokeCloudDuration)
+        {
+            AttractEnemies();
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        Explode();
+    }
+
+    private void AttractEnemies()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, explosionRadius, targetLayer);
+        foreach (var c in colliders)
+        {
+            if (c.TryGetComponent<IAttractable>(out var enemy))
+            {
+                enemy.AttractTo(transform.position, smokeCloudDuration);
+            }
         }
     }
 
     private void Explode()
     {
-        exploded = true;
-
         if (explosionPrefab != null)
         {
-            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
-            if (explosion.TryGetComponent<Renderer>(out var renderer))
-            {
-                renderer.material.color = smokeColor;
-            }
+            var explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            if (explosion.TryGetComponent<Renderer>(out var r))
+                r.material.color = smokeColor;
 
             explosion.transform.localScale = Vector3.one * explosionRadius;
-            Destroy(explosion, smokeCloudDuration);
+            Destroy(explosion, 2f);
         }
 
-        StartCoroutine(DealDamageOverTime());
-
-        if (TryGetComponent<Renderer>(out var bombRenderer))
-        {
-            bombRenderer.enabled = false;
-        }
-
-        if (TryGetComponent<Collider2D>(out var collider))
-        {
-            collider.enabled = false;
-        }
-
-        Destroy(gameObject, smokeCloudDuration);
+        ApplyEffects();
+        Destroy(gameObject);
     }
 
-    private IEnumerator DealDamageOverTime()
+    private void ApplyEffects()
     {
-        float elapsedTime = 0f;
-
-        while (elapsedTime < smokeCloudDuration)
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, explosionRadius, targetLayer);
+        foreach (var col in colliders)
         {
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, explosionRadius, targetLayer);
-            foreach (var collider in colliders)
+            if (col.TryGetComponent<IDamagable>(out var dmg) && dmg.IsAlive())
             {
-                if (collider.TryGetComponent<IDamagable>(out var damageable) && damageable.IsAlive())
-                {
-                    damageable.TakeDamage(damage, owner);
-                }
+                dmg.TakeDamage(damage, owner);
             }
 
-            elapsedTime += damageTickTime;
-            yield return new WaitForSeconds(damageTickTime);
+            if (col.TryGetComponent<IDisorientable>(out var disorient))
+            {
+                disorient.ApplyDisorientation(2f);
+            }
         }
     }
 }
