@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BAttack", menuName = "Attack Strategies/B")]
-public class BAttackStrategy : AttackStrategy
+public class BAttackStrategy : AttackStrategy //interface (projectile, ranged, instanciated, initialize)
 {
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float projectileSpeed = 10f;

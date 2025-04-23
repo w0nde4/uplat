@@ -1,43 +1,29 @@
-using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInventoryWallet))]
 public class PlayerInteractor : MonoBehaviour
 {
     [SerializeField] private float interactRadius = 2f;
     [SerializeField] private LayerMask interactableLayer;
-    [SerializeField] private TextMeshProUGUI promptText;
     [SerializeField] private KeyCode interactKey = KeyCode.X;
 
-    private Player player;
+    private PlayerInventoryWallet playerEconomy;
     private IInteractible currentTarget;
 
     private void Awake()
     {
-        player = GetComponent<Player>();
-        if(promptText != null ) promptText.gameObject.SetActive(false);
+        playerEconomy = GetComponent<PlayerInventoryWallet>();
     }
 
     private void Update()
     {
         ScanForInteractables();
-
         if (currentTarget != null)
         {
-            if (promptText != null)
-            {
-                promptText.text = currentTarget.GetInteractionPrompt();
-                promptText.gameObject.SetActive(true);
-            }
-
             if (Input.GetKeyDown(interactKey))
             {
-                currentTarget.Interact(player);
+                currentTarget.Interact(playerEconomy);
             }
-        }
-
-        else if(promptText != null)
-        {
-            promptText.gameObject.SetActive(false);
         }
     }
 
@@ -45,6 +31,18 @@ public class PlayerInteractor : MonoBehaviour
     {
         var hits = Physics2D.OverlapCircleAll(transform.position, interactRadius, interactableLayer);
 
+        var closest = GetClosestInteractible(hits);
+
+        if (currentTarget != closest)
+        {
+            if (currentTarget != null) currentTarget.Highlight(false);
+            currentTarget = closest;
+            if (currentTarget != null) currentTarget.Highlight(true);
+        }
+    }
+
+    private IInteractible GetClosestInteractible(Collider2D[] hits)
+    {
         IInteractible closest = null;
         float minDist = Mathf.Infinity;
 
@@ -60,21 +58,7 @@ public class PlayerInteractor : MonoBehaviour
                 }
             }
         }
-
-        if (currentTarget != closest)
-        {
-            if (currentTarget != null)
-            {
-                currentTarget.Highlight(false);
-            }
-
-            currentTarget = closest;
-
-            if (currentTarget != null)
-            {
-                currentTarget.Highlight(true);
-            }
-        }
+        return closest;
     }
 
     private void OnDrawGizmosSelected()

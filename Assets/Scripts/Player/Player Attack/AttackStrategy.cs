@@ -15,9 +15,9 @@ public abstract class AttackStrategy : ScriptableObject
 
     public virtual void ApplyDamage(GameObject target, GameObject attacker, int damage)
     {
-        IDamagable damagable = target.GetComponent<IDamagable>();
+        DamageHandler damagable = target.GetComponent<DamageHandler>();
 
-        if (damagable != null && damagable.IsAlive())
+        if (damagable != null)
         {
             Debug.Log(target.name + " получил " + damage + " урона.");
             damagable.TakeDamage(damage, attacker);
@@ -33,7 +33,7 @@ public abstract class AttackStrategy : ScriptableObject
         return hitEnemies;
     }
 
-    public virtual bool SupportsCombo() => false;
+    public virtual bool SupportsCombo() => false; //interface
     public virtual void OnComboReset() { }
     public virtual void OnComboPerformed() { }
     public virtual int GetComboStep() => 0;

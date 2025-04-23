@@ -1,5 +1,4 @@
 using System;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent (typeof(Rigidbody2D))]
@@ -10,26 +9,20 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
     [SerializeField] private float acceleration = 30f;
     [SerializeField] private float deceleration = 20f;
 
-    private float speedMultiplier = 1f;
+    private bool isDashing;
+
     private Rigidbody2D rb;
+
     private float moveInput;
+    private float previousMoveInput = 0f;
     private float currentSpeed;
     private float currentDirection;
     private float lastDirection = 1;
-    private bool isDashing;
-    private float previousMoveInput = 0f;
 
-    public float SpeedMultiplier
+    private void Awake()
     {
-        get
-        {
-            return speedMultiplier;
-        }
-        set
-        {
-            if (value >= 1) speedMultiplier = value;
-            else speedMultiplier = 1f;
-        }
+        rb = GetComponent<Rigidbody2D>();
+        currentSpeed = 0;
     }
 
     private void OnEnable()
@@ -42,19 +35,15 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
         PlayerEvent.OnDashChanged -= HandleDash;
     }
 
-    private void Start()
+    private void HandleDash(bool isDashing)
     {
-        rb = GetComponent<Rigidbody2D>();
-        currentSpeed = 0;
+        this.isDashing = isDashing;
     }
 
     private void Update()
     {
-        if (!isDashing)
-        {
-            previousMoveInput = moveInput;
-            moveInput = Input.GetAxis("Horizontal");
-        }
+        previousMoveInput = moveInput;
+        moveInput = Input.GetAxis("Horizontal");
     }
 
     private void FixedUpdate()
@@ -95,7 +84,7 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
             UpdateDirection();
         }
 
-        float horizontalSpeed = currentSpeed * currentDirection * speedMultiplier;
+        float horizontalSpeed = currentSpeed * currentDirection;
         rb.linearVelocity = new Vector2(horizontalSpeed, rb.linearVelocity.y);
     }
 
@@ -111,11 +100,6 @@ public class PlayerMovement : MonoBehaviour, IDirectionable
             if (currentDirection != 0) lastDirection = currentDirection;
             currentDirection = 0;
         }
-    }
-
-    private void HandleDash(bool isDashing)
-    {
-        this.isDashing = isDashing;
     }
 
     public Vector2 GetFacingDirection()

@@ -19,18 +19,18 @@ public class HealthUISetter : MonoBehaviour
     {
         if (playerHealth != null)
         {
-            UpdateHealthBar(playerHealth.CurrentHealth, playerHealth.MaxHealth);
+            UpdateHealthBar(playerHealth.Current, playerHealth.Max);
         }
     }
 
     private void OnEnable()
     {
-        playerHealth.OnHealthChanged += UpdateHealthBar;
+        playerHealth.OnChanged += UpdateHealthBar;
     }
 
     private void OnDisable()
     {
-        playerHealth.OnHealthChanged += UpdateHealthBar;
+        playerHealth.OnChanged -= UpdateHealthBar;
     }
 
     public void UpdateHealthBar(int current, int max)

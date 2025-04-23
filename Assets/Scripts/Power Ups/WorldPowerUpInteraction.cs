@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WorldPowerUpInteraction : IPowerUpInteractionStrategy
 {
-    public void Interact(PowerUpInstance powerUpInstance, Player player)
+    public void Interact(PowerUpInstance powerUpInstance, PlayerInventoryWallet player)
     {
         PowerUp powerUp = powerUpInstance.PowerUpData;
 

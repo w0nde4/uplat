@@ -7,7 +7,7 @@ public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackStrategy[] attackStrategies;
 
-    private float damageMultiplier = 1f;
+    private float damageMultiplier = 1f; //multiplier to another
 
     public float DamageMultiplier
     {

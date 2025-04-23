@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent (typeof(Rigidbody2D))]
-public abstract class Projectile : MonoBehaviour
+public abstract class Projectile : MonoBehaviour //interface
 {
     protected Rigidbody2D rb;
     protected GameObject owner;

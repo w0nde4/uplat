@@ -11,7 +11,7 @@ public class ShopPowerUpInteraction : IPowerUpInteractionStrategy
         this.shop = shop;
     }
 
-    public void Interact(PowerUpInstance powerUpInstance, Player player)
+    public void Interact(PowerUpInstance powerUpInstance, PlayerInventoryWallet player)
     {
         if (player.TryPurchasePowerUp(item))
         {

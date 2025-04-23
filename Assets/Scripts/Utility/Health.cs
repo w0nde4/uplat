@@ -1,54 +1,21 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class Health : MonoBehaviour, IDamagable
+public class Health : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 100;
-    [SerializeField] private bool isInvulnerableAfterHit = false;
-    [SerializeField] private float invulnerabilityDuration = 0.5f;
+    [SerializeField] private int max = 100;
 
-    private int currentHealth;
-    private float maxHealthMultiplier = 1f;
-    private int invulnerabilitySources = 0;
+    private int current;
 
-    public float MaxHealthMultiplier
-    {
-        get
-        {
-            return maxHealthMultiplier;
-        }
-        set
-        {
-            if (value >= 1f)
-            {
-                float oldMultiplier = maxHealthMultiplier;
-                maxHealthMultiplier = value;
+    public int Max => max;
+    public int Current => current;
 
-                int oldMaxHealth = maxHealth;
-                int newMaxHealth = Mathf.RoundToInt(maxHealth * maxHealthMultiplier);
-                
-                SetMaxHealth(newMaxHealth);
-            }
-            else maxHealthMultiplier = 1f;
-        }
-    }
-
-    public int MaxHealth => maxHealth;
-    public int CurrentHealth => currentHealth;
-
-    public bool IsInvulnerable => invulnerabilitySources > 0;
-
-    public event Action<int, int> OnHealthChanged; 
-    public event Action<GameObject> OnDamageTaken;
-    public event Action OnDeath;
-
-    public event Func<int, GameObject, int> OnModifyDamage;
+    public event Action<int, int> OnChanged;
 
     private void Awake()
     {
-        currentHealth = maxHealth;
+        current = max;
     }
 
     private void Update()
@@ -57,107 +24,24 @@ public class Health : MonoBehaviour, IDamagable
         {
             if (Input.GetKeyUp(KeyCode.DownArrow))
             {
-                TakeDamage(10, gameObject);
+                Decrease(10);
             }
             if (Input.GetKeyUp(KeyCode.UpArrow))
             {
-                Heal(10);
+                Increase(10);
             }
         }
     }
 
-    public void TakeDamage(int damage, GameObject damager)
+    public void Increase(int value)
     {
-        if (IsInvulnerable || damage <= 0 || !IsAlive())
-            return;
-
-        if(OnModifyDamage != null)
-        {
-            damage = OnModifyDamage.Invoke(damage, damager);
-        }
-
-        currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        OnDamageTaken?.Invoke(damager);
-
-        if (isInvulnerableAfterHit)
-        {
-            AddInvulnerabilitySource();
-            StartCoroutine(RemoveInvulnerabilityAfterDelay(invulnerabilityDuration));
-        }
-
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        current = Mathf.Max(current + value, max);
+        OnChanged?.Invoke(current, max);
     }
 
-    private IEnumerator RemoveInvulnerabilityAfterDelay(float duration)
+    public void Decrease(int value)
     {
-        yield return new WaitForSeconds(duration);
-        RemoveInvulnerabilitySource();
+        current = Mathf.Clamp(current - value, 0, max);
+        OnChanged?.Invoke(current, max);
     }
-
-    public bool IsAlive()
-    {
-        return currentHealth > 0;
-    }
-
-    public void Heal(int amount)
-    {
-        if (!IsAlive() || amount <= 0)
-            return;
-
-        if (amount < 0)
-        {
-            throw new System.ArgumentOutOfRangeException("Negative heal");
-        }
-
-        currentHealth += amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-    }
-
-    private void SetMaxHealth(int newMaxHealth)
-    {
-        if(newMaxHealth <= 0)
-        {
-            Debug.LogError("Attempted to set max health to zero or negative value!");
-            return;
-        }
-
-        int oldMaxHealth = maxHealth;
-        maxHealth = newMaxHealth;
-
-        if (newMaxHealth > oldMaxHealth)
-        {
-            currentHealth += (newMaxHealth - oldMaxHealth);
-        }
-
-        if(IsAlive())
-        {
-            currentHealth = Mathf.Max(1, currentHealth);
-        }
-
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-    }
-
-    private void Die()
-    {
-        Debug.Log($"{gameObject.name} died!");
-        OnDeath?.Invoke();
-    }
-
-    public float GetHealthPercentage()
-    {
-        return (float)currentHealth / maxHealth;
-    }
-
-    public void AddInvulnerabilitySource() => invulnerabilitySources++;
-
-    public void RemoveInvulnerabilitySource() => invulnerabilitySources = Mathf.Max(0, invulnerabilitySources - 1);
 }

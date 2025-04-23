@@ -1,10 +1,6 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Base class for all smoke-powered abilities
-/// Inherits from the abstract Ability class
-/// </summary>
 public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
 {
     [Header("Smoke Properties")]
@@ -13,28 +9,22 @@ public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
 
     [Header("Visual Effects")]
     [SerializeField] protected GameObject smokeEffectPrefab;
-    [SerializeField] protected Color smokeColor = Color.gray;
+    [SerializeField] protected Color smokeColor = Color.gray; //remove
     [SerializeField] protected float effectDuration = 1.0f;
-
-    public event Action<GameObject, SmokeAbility, float> OnAbilityUsed;
 
     protected float lastUseTime = -100;
 
-    /// <summary>
-    /// Checks if the ability can be used based on available smoke and cooldown
-    /// </summary>
-    /// <param name="currentSmoke">Current amount of smoke available</param>
-    /// <returns>True if the ability can be used</returns>
+    public float CooldownTime => cooldownTime;
+    public float SmokeCost => smokeCost;
+    public float RemainingCooldown => Mathf.Max(0, (lastUseTime + cooldownTime) - Time.time);
+
+    public event Action<GameObject, SmokeAbility, float> OnAbilityUsed;
+
     public virtual bool CanUse(float currentSmoke)
     {
         return currentSmoke >= smokeCost && Time.time > lastUseTime + cooldownTime;
     }
 
-    /// <summary>
-    /// Uses the ability and returns the amount of smoke consumed
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    /// <returns>Amount of smoke consumed</returns>
     public virtual float Use(GameObject user)
     {
         if (CanUse(GetSmokeAmount(user)))
@@ -52,18 +42,12 @@ public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
         OnAbilityUsed?.Invoke(user, ability, remainingCooldown);
     }
 
-
     public void ResetCooldown()
     {
         lastUseTime = -cooldownTime;
     }
 
-
-    /// <summary>
-    /// Implemented by derived classes to perform the specific ability effect
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    protected virtual void PerformAbility(GameObject user)
+    protected virtual void PerformAbility(GameObject user) //interface
     {
         if (smokeEffectPrefab != null)
         {
@@ -81,20 +65,10 @@ public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
             Destroy(effect, effectDuration);
         }
     }
-    /// <summary>
-    /// Gets the current smoke amount from the user
-    /// </summary>
-    /// <param name="user">GameObject with Smoke component</param>
-    /// <returns>Current smoke amount or 0 if Smoke component not found</returns>
+
     protected float GetSmokeAmount(GameObject user)
     {
         Smoke smoke = user.GetComponent<Smoke>();
         return smoke != null ? smoke.CurrentSmokeAmount : 0f;
     }
-
-    public float CooldownTime => cooldownTime;
-
-    public float SmokeCost => smokeCost;
-
-    public float RemainingCooldown => Mathf.Max(0, (lastUseTime + cooldownTime) - Time.time);
 }

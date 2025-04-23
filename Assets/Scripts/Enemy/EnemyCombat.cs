@@ -2,11 +2,7 @@ using UnityEngine;
 
 public class EnemyCombat : MonoBehaviour, IAttacker
 {
-    [Header("Attack Settings")]
-    [SerializeField] private int damage = 10;
-    [SerializeField] private float attackRange = 1.5f;
-    [SerializeField] private float attackCooldown = 1.5f;
-    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] EnemySettings settings;
 
     private float lastAttackTime = 0f;
     private Transform target;
@@ -22,7 +18,7 @@ public class EnemyCombat : MonoBehaviour, IAttacker
 
     public bool CanAttack()
     {
-        return Time.time >= lastAttackTime + attackCooldown;
+        return Time.time >= lastAttackTime + settings.AttackCooldown;
     }
 
     public bool IsTargetInRange()
@@ -30,33 +26,31 @@ public class EnemyCombat : MonoBehaviour, IAttacker
         if (target == null)
             return false;
 
-        return Vector2.Distance(transform.position, target.position) <= attackRange;
+        return Vector2.Distance(transform.position, target.position) <= settings.AttackRange;
     }
-
-    
 
     public void PerformAttack(GameObject target)
     {
         if (!CanAttack())
             return;
 
-        IDamagable damageable = target.GetComponent<IDamagable>();
+        DamageHandler damageable = target.GetComponent<DamageHandler>();
 
-        if (damageable != null && damageable.IsAlive())
+        if (damageable != null)
         {
-            damageable.TakeDamage(damage, gameObject);
+            damageable.TakeDamage(settings.Damage, gameObject);
             lastAttackTime = Time.time;
         }
     }
 
     public int GetDamage()
     {
-        return damage;
+        return settings.Damage;
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, settings.AttackRange);
     }
 }

@@ -21,7 +21,7 @@ public class Smoke : MonoBehaviour
     [SerializeField] private PassiveSmokeAbility passiveAbility;
 
     [Header("UI References")]
-    [SerializeField] private GameObject smokeBarUI;
+    [SerializeField] private GameObject smokeBarUI; //single responsability
 
     private float currentSmokeAmount;
     private bool isRegenerating = false;
@@ -30,7 +30,7 @@ public class Smoke : MonoBehaviour
     public event Action<float, float> OnSmokeChanged;
     public event Action<SmokeAbility> OnAbilityUsed;
     public event Action<PassiveSmokeAbility, bool> OnPassiveAbilityStateChanged;
-    public event Action OnLowSmoke;
+    public event Action OnLowSmoke; //onlowsmoke remove
 
     public float CurrentSmokeAmount => currentSmokeAmount;
     public float MaximumSmokeAmount => maximumSmokeAmount;
@@ -52,6 +52,11 @@ public class Smoke : MonoBehaviour
         passiveAbility.OnPassiveStateChanged -= HandlePassiveStateChanged;
     }
 
+    private void HandlePassiveStateChanged(GameObject user, PassiveSmokeAbility ability, bool isActive)
+    {
+        OnPassiveAbilityStateChanged?.Invoke(ability, isActive);
+    }
+
     private void Start()
     {
         OnSmokeChanged?.Invoke(currentSmokeAmount, maximumSmokeAmount);
@@ -60,11 +65,6 @@ public class Smoke : MonoBehaviour
         {
             ability.ResetCooldown();
         }
-    }
-
-    private void HandlePassiveStateChanged(GameObject user, PassiveSmokeAbility ability, bool isActive)
-    {
-        OnPassiveAbilityStateChanged?.Invoke(ability, isActive);
     }
 
     private void Update()
@@ -81,7 +81,7 @@ public class Smoke : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < abilities.Count && i < abilityKeys.Length; i++)
+        for (int i = 0; i < abilities.Count && i < abilityKeys.Length; i++) //method
         {
             if (Input.GetKeyDown(abilityKeys[i]))
             {
@@ -115,12 +115,12 @@ public class Smoke : MonoBehaviour
         {
             if (currentSmokeAmount < ability.SmokeCost)
             {
-                OnLowSmoke?.Invoke();
+                OnLowSmoke?.Invoke(); 
             }
         }
     }
 
-    public bool SpendSmoke(float cost)
+    public bool SpendSmoke(float cost) //tryspend - bool
     {
         if (cost > currentSmokeAmount)
         {
@@ -140,7 +140,7 @@ public class Smoke : MonoBehaviour
         return true;
     }
 
-    public void RegenerateSmoke(float amount)
+    public void RegenerateSmoke(float amount) //debug - rename
     {
         if (amount < 0) amount = 0;
 

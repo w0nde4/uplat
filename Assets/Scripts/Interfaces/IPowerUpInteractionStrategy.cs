@@ -1,6 +1,4 @@
-using UnityEngine;
-
 public interface IPowerUpInteractionStrategy
 {
-    void Interact(PowerUpInstance powerUpInstance, Player player);
+    void Interact(PowerUpInstance powerUpInstance, PlayerInventoryWallet player);
 }

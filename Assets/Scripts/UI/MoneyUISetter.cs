@@ -4,13 +4,13 @@ using UnityEngine;
 public class MoneyUISetter : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI moneyTextAmount;
-    [SerializeField] private Player player;
+    [SerializeField] private PlayerInventoryWallet player;
 
-    private PlayerWallet playerWallet;
+    private Wallet playerWallet;
 
     private void Awake()
     {
-        playerWallet = player.GetComponent<PlayerWallet>();
+        playerWallet = player.GetComponent<Wallet>();
     }
 
     private void Start()

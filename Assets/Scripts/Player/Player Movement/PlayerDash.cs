@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerDash : MonoBehaviour
+public class PlayerDash : MonoBehaviour  //SO for data
 {
     [Header("Dash Properties")]
     [SerializeField] private float force = 24f;
@@ -21,10 +21,8 @@ public class PlayerDash : MonoBehaviour
 
     private Rigidbody2D rb;
     private float originalGravityScale;
-
     private bool isDashing = false;
     private bool isGrounded = true;
-
     private float lastDashTime;
     private Vector2 dashDirection;
 
@@ -91,7 +89,7 @@ public class PlayerDash : MonoBehaviour
         rb.linearVelocity = new Vector2(dashDirection.x * force, rb.linearVelocity.y * verticalVelocityRetention);
     }
 
-    private bool IsObstacleAhead()
+    private bool IsObstacleAhead() //remake
     {
         return Physics2D.Raycast(transform.position, dashDirection, obstacleDetectionDistance, obstacleLayer);
     }

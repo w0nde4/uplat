@@ -63,7 +63,7 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
     public bool IsHighlighed() => isHighlighted;
 
-    public void Interact(Player player)
+    public void Interact(PlayerInventoryWallet player)
     {
         if(interactionStrategy == null)
         {

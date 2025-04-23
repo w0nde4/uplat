@@ -1,208 +1,86 @@
-using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class EnemyAI : MonoBehaviour, IDisorientable, IAttractable
+public class EnemyAI : MonoBehaviour
 {
+    [SerializeField] private EnemySettings settings;
     [SerializeField] private Transform[] patrolPoints;
-    [SerializeField] private LayerMask playerLayer;
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 2f;
-    [SerializeField] private float chaseSpeed = 3f;
-    [SerializeField] private float detectionRange = 5f;
-    [SerializeField] private float attackRange = 1.5f;
 
-    private enum EnemyState { Patrol, Chase, Attack, Lured, Disoriented }
-    private EnemyState currentState = EnemyState.Patrol;
-    private int currentPatrolIndex = 0;
-    private float waypointThreshold = 1f;
+    private FSM fsm;
     private Transform player;
-    private EnemyCombat combat;
-    private Health health;
     private Rigidbody2D rb;
-    private SpriteRenderer sr;
-    private Vector3? lureTarget = null;
-    private float lureDuration = 0f;
-    private bool isDisoriented = false;
+
+    public Transform[] PatrolPoints => patrolPoints;
+    public Transform PlayerTransform => player;
+    public EnemySettings Settings => settings;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+    }
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>();
-        combat = GetComponent<EnemyCombat>();
-        health = GetComponent<Health>();
-
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-
-        if (health != null)
-        {
-            health.OnDeath += OnDeath;
-        }
+        InitFsm();
     }
 
-    private void OnDestroy()
+    private void InitFsm()
     {
-        if (health != null)
+        fsm = new FSM();
+
+        if(settings == null)
         {
-            health.OnDeath -= OnDeath;
+            Debug.LogError("Please set enemy settings");
+            return;
         }
+
+        fsm.AddState(new PatrolState(fsm, this, settings));
+        fsm.AddState(new ChaseState(fsm, this, settings));
+        
+        if(TryGetComponent(out EnemyCombat combat))
+            fsm.AddState(new AttackState(fsm, this, settings, combat));
+
+        else
+            Debug.LogWarning("Cant add combat component because enemy instance doesn't contain one");
+
+        fsm.SetState<PatrolState>();
     }
 
     private void Update()
     {
-        if (health != null && !health.IsAlive())
-            return;
-
-        if (isDisoriented)
-        {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-
-        UpdateState();
-
-        switch (currentState)
-        {
-            case EnemyState.Patrol:
-                Patrol();
-                break;
-            case EnemyState.Chase:
-                Chase();
-                break;
-            case EnemyState.Attack:
-                Attack();
-                break;
-            case EnemyState.Lured:
-                Lure();
-                break;
-        }
+        fsm.Update();
     }
 
-    private void UpdateState()
+    public void SetSpeedToZero()
     {
-        if (lureTarget.HasValue)
-        {
-            currentState = EnemyState.Lured;
-            return;
-        }
-
-        if (player == null)
-            return;
-
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= attackRange)
-        {
-            currentState = EnemyState.Attack;
-        }
-        else if (distanceToPlayer <= detectionRange)
-        {
-            currentState = EnemyState.Chase;
-        }
-        else
-        {
-            currentState = EnemyState.Patrol;
-        }
-    }
-
-    private void Patrol()
-    {
-        if (patrolPoints.Length == 0)
-            return;
-
-        Transform targetPoint = patrolPoints[currentPatrolIndex];
-        MoveTowards(targetPoint.position, moveSpeed);
-
-        if (Vector2.Distance(transform.position, targetPoint.position) < waypointThreshold)
-        {
-            currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
-        }
-    }
-
-    private void Chase()
-    {
-        if (player == null)
-            return;
-
-        MoveTowards(player.position, chaseSpeed);
-    }
-
-    private void Attack()
-    {
-        if (player == null || combat == null)
-            return;
-
         rb.linearVelocity = Vector2.zero;
-
-        if (combat.CanAttack())
-        {
-            combat.PerformAttack(player.gameObject);
-        }
     }
 
-    private void Lure()
+    public void MoveTowards(Vector2 targetPosition, float speed)
     {
-        if (!lureTarget.HasValue) return;
-
-        MoveTowards(lureTarget.Value, moveSpeed);
-
-        lureDuration -= Time.deltaTime;
-        if (lureDuration <= 0)
+        if(speed <= 0)
         {
-            lureTarget = null;
+            Debug.LogWarning("Trying to set enemy movement speed via [MOVETOWARDS] to negative or zero");
+            return;
         }
-    }
 
-    private void MoveTowards(Vector2 targetPosition, float speed)
-    {
+        if(targetPosition == null)
+        {
+            Debug.LogWarning("Null target position");
+            return;
+        }
+
         float direction = Mathf.Clamp((targetPosition.x - transform.position.x), -1, 1);
         rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
     }
 
-    private void OnDeath()
-    {
-        rb.linearVelocity = Vector2.zero;
-        sr.color = Color.red;
-
-        enabled = false;
-    }
-
-    public void AttractTo(Vector3 position, float duration)
-    {
-        lureTarget = position;
-        lureDuration = duration;
-    }
-
-    public void ApplyDisorientation(float duration)
-    {
-        if (!isDisoriented)
-            StartCoroutine(DisorientRoutine(duration));
-    }
-
-    private IEnumerator DisorientRoutine(float duration)
-    {
-        isDisoriented = true;
-        rb.linearVelocity = Vector2.zero;
-
-        float blinkRate = 0.1f;
-        for (float t = 0; t < duration; t += blinkRate)
-        {
-            sr.enabled = !sr.enabled;
-            yield return new WaitForSeconds(blinkRate);
-        }
-
-        sr.enabled = true;
-        isDisoriented = false;
-    }
-
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireSphere(transform.position, settings.DetectionRange);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, settings.AttackRange);
 
         Gizmos.color = Color.blue;
         if (patrolPoints != null)

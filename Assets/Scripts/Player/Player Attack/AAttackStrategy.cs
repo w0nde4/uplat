@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AAttack", menuName = "Attack Strategies/A")]
-public class AAttackStrategy : AttackStrategy
+public class AAttackStrategy : AttackStrategy //combo interface
 {
     [SerializeField] private int maxComboStep = 3;
     [SerializeField] private float comboResetTime = 1.5f;
@@ -46,7 +46,7 @@ public class AAttackStrategy : AttackStrategy
 
     public override int GetComboStep() => currentComboStep;
 
-    public override void UpdateStrategy(float deltaTime)
+    public override void UpdateStrategy(float deltaTime) //interface
     {
         timeSinceLastAttack += deltaTime;
         if(timeSinceLastAttack >= comboResetTime && currentComboStep != 0)

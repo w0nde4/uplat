@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
 
 public enum Rarity
 {
@@ -36,8 +35,8 @@ public abstract class PowerUp : ScriptableObject
     [SerializeField] private int baseCost;
 
     [Header("Events")]
-    public UnityEvent<Player> OnActivated;
-    public UnityEvent<Player> OnDeactivated;
+    public UnityEvent<PlayerInventoryWallet> OnActivated;
+    public UnityEvent<PlayerInventoryWallet> OnDeactivated;
 
     // Runtime properties
     private bool isEffectActive = false;
@@ -62,15 +61,11 @@ public abstract class PowerUp : ScriptableObject
     public int MaxUses => maxUses;
 
     // Abstract methods that derived classes must implement
-    public abstract void ApplyEffect(Player player);
-    public abstract void RemoveEffect(Player player);
-
-    // Optional methods that derived classes can override
-    public virtual void OnInitialize(Player player) { }
-    public virtual void OnUpdate(Player player) { }
+    public abstract void ApplyEffect(PlayerInventoryWallet player);
+    public abstract void RemoveEffect(PlayerInventoryWallet player);
 
     // Helper methods for component access and property modification
-    protected T GetComponent<T>(Player player) where T : Component
+    protected T GetComponent<T>(PlayerInventoryWallet player) where T : Component
     {
         if (player == null) return null;
         return player.GetComponent<T>();
@@ -83,15 +78,14 @@ public abstract class PowerUp : ScriptableObject
         setter(component, newValue);
     }
 
-    public virtual void Initialize(Player player)
+    public virtual void Initialize(PlayerInventoryWallet player)
     {
         remainingUses = maxUses;
         isEffectActive = false;
         cooldownEndTime = 0f;
-        OnInitialize(player);
     }
 
-    public virtual void OnAcquired(Player player)
+    public virtual void OnAcquired(PlayerInventoryWallet player)
     {
         Initialize(player);
 
@@ -115,7 +109,7 @@ public abstract class PowerUp : ScriptableObject
         Debug.Log($"{player.name} acquired {powerUpName}");
     }
 
-    public virtual void OnRemoved(Player player)
+    public virtual void OnRemoved(PlayerInventoryWallet player)
     {
         if (effectCoroutine != null)
         {
@@ -140,7 +134,7 @@ public abstract class PowerUp : ScriptableObject
         Debug.Log($"{player.name} removed {powerUpName}");
     }
 
-    public virtual bool TryUse(Player player)
+    public virtual bool TryUse(PlayerInventoryWallet player)
     {
         if (isPassive) return false;
         if (IsOnCooldown) return false;
@@ -150,7 +144,7 @@ public abstract class PowerUp : ScriptableObject
         return true;
     }
 
-    protected virtual void Use(Player player)
+    protected virtual void Use(PlayerInventoryWallet player)
     {
         if (isPassive) return;
 
@@ -193,7 +187,7 @@ public abstract class PowerUp : ScriptableObject
         }
     }
 
-    public virtual IEnumerator RemoveEffectAfterDelay(Player player)
+    public virtual IEnumerator RemoveEffectAfterDelay(PlayerInventoryWallet player)
     {
         yield return new WaitForSeconds(effectDuration);
 
