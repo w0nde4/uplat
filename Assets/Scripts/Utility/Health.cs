@@ -35,7 +35,7 @@ public class Health : MonoBehaviour
 
     public void Increase(int value)
     {
-        current = Mathf.Max(current + value, max);
+        current = Mathf.Min(current + value, max);
         OnChanged?.Invoke(current, max);
     }
 

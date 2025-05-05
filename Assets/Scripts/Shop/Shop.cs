@@ -7,10 +7,10 @@ public class Shop : MonoBehaviour //separate spawn and storage
     [Serializable]
     public class ShopItem
     {
-        public PowerUp powerUp;
+        public PowerUpData powerUp;
         public int price;
 
-        public ShopItem(PowerUp powerUp, int price)
+        public ShopItem(PowerUpData powerUp, int price)
         {
             this.powerUp = powerUp;
             this.price = price;

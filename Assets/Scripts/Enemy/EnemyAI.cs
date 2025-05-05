@@ -74,6 +74,11 @@ public class EnemyAI : MonoBehaviour
         rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
     }
 
+    public FSMState GetCurrentState()
+    {
+        return fsm.CurrentState;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

@@ -27,6 +27,12 @@ public class PlayerInventoryWallet : MonoBehaviour
         return wallet.TrySpend(item.price);
     }
 
+    public void AddMoney(int value)
+    {
+        if(wallet == null) return;
+        wallet.AddMoney(value);
+    }
+
     public void GiveMoneyBack(Shop.ShopItem item)
     {
         if (wallet == null) return;
@@ -34,7 +40,7 @@ public class PlayerInventoryWallet : MonoBehaviour
 
     }
 
-    public bool TryAcquirePowerUp(PowerUp powerUp)
+    public bool TryAcquirePowerUp(PowerUpData powerUp)
     {
         if (inventory == null) return false;
         return inventory.TryRecieve(powerUp);

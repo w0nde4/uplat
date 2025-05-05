@@ -6,33 +6,33 @@ using UnityEngine;
 public class InventorySection
 {
     [SerializeField] private int maxSlots;
-    private readonly List<PowerUp> items = new List<PowerUp>();
+    private readonly List<PowerUpData> items = new List<PowerUpData>();
 
-    public event Action<PowerUp> OnAdded;
-    public event Action<PowerUp> OnRemoved;
+    public event Action<PowerUpData> OnAdded;
+    public event Action<PowerUpData> OnRemoved;
 
-    public IReadOnlyList<PowerUp> Items => items.AsReadOnly();
+    public IReadOnlyList<PowerUpData> Items => items.AsReadOnly();
     public int MaxSlots => maxSlots;
     public bool IsFull => items.Count >= maxSlots;
     public int Count => items.Count;
 
-    public bool Contains(PowerUp powerUp) => items.Contains(powerUp);
+    public bool Contains(PowerUpData powerUp) => items.Contains(powerUp);
 
-    public bool TryAdd(PowerUp powerUp, PlayerInventoryWallet player)
+    public bool TryAdd(PowerUpData powerUp, PlayerInventoryWallet player)
     {
         if (IsFull) return false;
 
         items.Add(powerUp);
-        powerUp.OnAcquired(player);
+        powerUp.OnAcquired();
         OnAdded?.Invoke(powerUp);
         return true;
     }
 
-    public bool TryRemove(PowerUp powerUp, PlayerInventoryWallet player)
+    public bool TryRemove(PowerUpData powerUp, PlayerInventoryWallet player)
     {
         if (items.Remove(powerUp))
         {
-            powerUp.OnRemoved(player);
+            powerUp.OnRemoved();
             OnRemoved?.Invoke(powerUp);
             return true;
         }

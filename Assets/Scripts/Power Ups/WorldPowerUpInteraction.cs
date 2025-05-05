@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class WorldPowerUpInteraction : IPowerUpInteractionStrategy
 {
-    public void Interact(PowerUpInstance powerUpInstance, PlayerInventoryWallet player)
+    public void Interact(PowerUpInstance powerUpInstance, MonoBehaviour interactor)
     {
-        PowerUp powerUp = powerUpInstance.PowerUpData;
+        PowerUpData powerUp = powerUpInstance.PowerUpData;
 
-        if(player.TryAcquirePowerUp(powerUp))
+        if(interactor.TryGetComponent(out PlayerInventoryWallet player))
         {
+            player.TryAcquirePowerUp(powerUp);
             GameObject.Destroy(powerUpInstance.gameObject);
         }
     }

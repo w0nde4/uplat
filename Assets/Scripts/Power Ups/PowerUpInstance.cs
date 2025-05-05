@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public enum PowerUpContext
@@ -7,10 +5,11 @@ public enum PowerUpContext
     World,
     Shop
 }
+
 [RequireComponent(typeof(Collider2D))]
 public class PowerUpInstance : MonoBehaviour, IInteractible
 {
-    [SerializeField] private PowerUp powerUpData;
+    [SerializeField] private PowerUpData powerUpData;
     [SerializeField] private PowerUpContext context;
     
     [SerializeField] private SpriteRenderer highlightRenderer;
@@ -18,14 +17,12 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
     private Color originalColor;
     private bool isHighlighted = false;
-    private bool isOnLayer;
 
-    private Shop shop;
     private IPowerUpInteractionStrategy interactionStrategy;
 
-    public PowerUp PowerUpData => powerUpData;
+    public PowerUpData PowerUpData => powerUpData;
 
-    public void Init(PowerUp powerUp, IPowerUpInteractionStrategy strategy)
+    public void Init(PowerUpData powerUp, IPowerUpInteractionStrategy strategy)
     {
         this.powerUpData = powerUp;
         this.interactionStrategy = strategy;
@@ -61,16 +58,23 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
         highlightRenderer.color = shouldHighlight ? highlightColor : originalColor;
     }
 
-    public bool IsHighlighed() => isHighlighted;
+    public bool IsHighlighted()
+    {
+        return isHighlighted;
+    }
 
-    public void Interact(PlayerInventoryWallet player)
+    public void Interact(MonoBehaviour interactor)
     {
         if(interactionStrategy == null)
         {
             Debug.LogWarning("Interaction strategy not set!");
             return;
         }
-        interactionStrategy?.Interact(this, player);
+
+        if(interactor is MonoBehaviour player)
+        {
+            interactionStrategy?.Interact(this, player);
+        }
     }
 
     public string GetInteractionPrompt()

@@ -1,11 +1,15 @@
+using System;
 using UnityEngine;
 
 public class EnemyCombat : MonoBehaviour, IAttacker
 {
-    [SerializeField] EnemySettings settings;
+    [SerializeField] private EnemySettings settings;
 
     private float lastAttackTime = 0f;
     private Transform target;
+    private GameObject damageTarget;
+
+    public event Action<GameObject> OnAttack;
 
     private void Start()
     {
@@ -18,7 +22,7 @@ public class EnemyCombat : MonoBehaviour, IAttacker
 
     public bool CanAttack()
     {
-        return Time.time >= lastAttackTime + settings.AttackCooldown;
+        return enabled && Time.time >= lastAttackTime + settings.AttackCooldown;
     }
 
     public bool IsTargetInRange()
@@ -34,12 +38,18 @@ public class EnemyCombat : MonoBehaviour, IAttacker
         if (!CanAttack())
             return;
 
-        DamageHandler damageable = target.GetComponent<DamageHandler>();
+        EnemyEvent.AttackStarted();
+        damageTarget = target;
+    }
 
-        if (damageable != null)
+    public void DeadDamage()
+    {
+        if (target.TryGetComponent(out IDamagable damagable))
         {
-            damageable.TakeDamage(settings.Damage, gameObject);
+            damagable.TakeDamage(settings.Damage, gameObject);
             lastAttackTime = Time.time;
+
+            OnAttack?.Invoke(damageTarget);
         }
     }
 

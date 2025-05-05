@@ -11,24 +11,27 @@ public class ShopPowerUpInteraction : IPowerUpInteractionStrategy
         this.shop = shop;
     }
 
-    public void Interact(PowerUpInstance powerUpInstance, PlayerInventoryWallet player)
+    public void Interact(PowerUpInstance powerUpInstance, MonoBehaviour interactor)
     {
-        if (player.TryPurchasePowerUp(item))
+        if(interactor.TryGetComponent(out PlayerInventoryWallet player))
         {
-            if (player.TryAcquirePowerUp(item.powerUp))
+            if (player.TryPurchasePowerUp(item))
             {
-                shop.NotifyItemSold(item);
-                GameObject.Destroy(powerUpInstance.gameObject);
+                if (player.TryAcquirePowerUp(item.powerUp))
+                {
+                    shop.NotifyItemSold(item);
+                    GameObject.Destroy(powerUpInstance.gameObject);
+                }
+                else
+                {
+                    player.GiveMoneyBack(item);
+                    Debug.Log("Inventory full!");
+                }
             }
             else
             {
-                player.GiveMoneyBack(item);
-                Debug.Log("Inventory full!");
+                Debug.Log("Not enough money!");
             }
-        }
-        else
-        {
-            Debug.Log("Not enough money!");
         }
     }
 }

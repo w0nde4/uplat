@@ -7,29 +7,31 @@ public class Inventory : MonoBehaviour
     [SerializeField] private InventorySection passiveSection = new InventorySection();
     [SerializeField] private InventorySection activeSection = new InventorySection();
 
-    private PowerUp currentActivePowerUp;
+    private PowerUpData currentActivePowerUp;
     private PlayerInventoryWallet player;
+    private MonoBehaviour coroutineRunner;
 
     public InventorySection PassiveSection => passiveSection;
     public InventorySection ActiveSection => activeSection;
-    public PowerUp CurrentActivePowerUp => currentActivePowerUp;
+    public PowerUpData CurrentActivePowerUp => currentActivePowerUp;
 
-    public event Action<PowerUp> OnPowerUpAdded;
-    public event Action<PowerUp> OnPowerUpRemoved;
-    public event Action<PowerUp> OnPowerUpUsed;
+    public event Action<PowerUpData> OnPowerUpAdded;
+    public event Action<PowerUpData> OnPowerUpRemoved;
+    public event Action<PowerUpData> OnPowerUpUsed;
 
     private void Awake()
     {
         player = GetComponent<PlayerInventoryWallet>();
+        coroutineRunner = this;
     }
 
     private void OnEnable()
     {
-        passiveSection.OnAdded += OnPowerUpAdded;
-        passiveSection.OnRemoved += OnPowerUpRemoved;
+        passiveSection.OnAdded += HandlePowerUpAdded;
+        passiveSection.OnRemoved += HandlePowerUpRemoved;
 
-        activeSection.OnAdded += OnPowerUpAdded;
-        activeSection.OnRemoved += OnPowerUpRemoved;
+        activeSection.OnAdded += HandlePowerUpAdded;
+        activeSection.OnRemoved += HandlePowerUpRemoved;
 
         activeSection.OnAdded += HandleActiveAdded;
         activeSection.OnRemoved += HandleActiveRemoved;
@@ -37,31 +39,41 @@ public class Inventory : MonoBehaviour
 
     private void OnDisable()
     {
-        passiveSection.OnAdded -= OnPowerUpAdded;
-        passiveSection.OnRemoved -= OnPowerUpRemoved;
+        passiveSection.OnAdded -= HandlePowerUpAdded;
+        passiveSection.OnRemoved -= HandlePowerUpRemoved;
 
-        activeSection.OnAdded -= OnPowerUpAdded;
-        activeSection.OnRemoved -= OnPowerUpRemoved;
+        activeSection.OnAdded -= HandlePowerUpAdded;
+        activeSection.OnRemoved -= HandlePowerUpRemoved;
 
         activeSection.OnAdded -= HandleActiveAdded;
         activeSection.OnRemoved -= HandleActiveRemoved;
     }
 
-    private void HandleActiveAdded(PowerUp powerUp)
+    private void HandlePowerUpAdded(PowerUpData powerUp)
+    {
+        OnPowerUpAdded?.Invoke(powerUp);
+    }
+
+    private void HandlePowerUpRemoved(PowerUpData powerUp)
+    {
+        OnPowerUpRemoved?.Invoke(powerUp);
+    }
+
+    private void HandleActiveAdded(PowerUpData powerUp)
     {
         if (currentActivePowerUp == null)
             currentActivePowerUp = powerUp;
     }
 
-    private void HandleActiveRemoved(PowerUp powerUp)
+    private void HandleActiveRemoved(PowerUpData powerUp)
     {
         if (currentActivePowerUp == powerUp)
             currentActivePowerUp = activeSection.Items.Count > 0 ? activeSection.Items[0] : null;
     }
 
-    public bool TryRecieve(PowerUp powerUp)
+    public bool TryRecieve(PowerUpData powerUp)
     {
-        var section = powerUp.IsPassive? passiveSection : activeSection;
+        var section = powerUp is IPassivePowerUp ? passiveSection : activeSection;
         
         if (section.IsFull)
             return false;
@@ -73,15 +85,20 @@ public class Inventory : MonoBehaviour
     {
         if (currentActivePowerUp == null) return;
 
-        currentActivePowerUp.TryUse(player);
-        OnPowerUpUsed?.Invoke(currentActivePowerUp);
+        if(currentActivePowerUp is IActivePowerUp activePowerUp)
+        {
+            if(activePowerUp.TryUse(coroutineRunner))
+            {
+                OnPowerUpUsed?.Invoke(currentActivePowerUp);
+            }
+        }
     }
 
-    public bool TryRemovePowerUp(PowerUp powerUp)
+    public bool TryRemovePowerUp(PowerUpData powerUp)
     {
         bool removed = false;
 
-        switch (powerUp.IsPassive)
+        switch (powerUp is IPassivePowerUp)
         {
             case true:
                 removed = passiveSection.TryRemove(powerUp, player);
