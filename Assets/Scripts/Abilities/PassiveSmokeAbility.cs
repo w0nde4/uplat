@@ -11,23 +11,10 @@ public abstract class PassiveSmokeAbility : SmokeAbility, IPassiveSmokeAbility
     protected GameObject activeEffect;
 
     public event Action<GameObject, PassiveSmokeAbility, bool> OnPassiveStateChanged;
-
-    /// <summary>
-    /// Current active state of the passive ability
-    /// </summary>
     public bool IsActive => isActive;
 
-    /// <summary>
-    /// Checks if the activation condition is met
-    /// </summary>
-    /// <param name="user">GameObject to check conditions for</param>
-    /// <returns>True if activation conditions are met</returns>
     public abstract bool CheckActivationCondition(GameObject user);
 
-    /// <summary>
-    /// Activates the passive ability
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
     public virtual void Activate(GameObject user)
     {
         if (!isActive)
@@ -38,10 +25,6 @@ public abstract class PassiveSmokeAbility : SmokeAbility, IPassiveSmokeAbility
         }
     }
 
-    /// <summary>
-    /// Deactivates the passive ability
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
     public virtual void Deactivate(GameObject user)
     {
         if (isActive)
@@ -52,11 +35,6 @@ public abstract class PassiveSmokeAbility : SmokeAbility, IPassiveSmokeAbility
         }
     }
 
-    /// <summary>
-    /// Updates the passive effect and returns smoke cost for this frame
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    /// <param name="deltaTime">Time since last frame</param>
     public virtual void UpdatePassiveEffect(GameObject user, float deltaTime)
     {
         bool conditionMet = CheckActivationCondition(user);
@@ -68,45 +46,9 @@ public abstract class PassiveSmokeAbility : SmokeAbility, IPassiveSmokeAbility
         if (isActive) ApplyPassiveEffect(user, deltaTime);
     }
 
-    /// <summary>
-    /// Implemented by derived classes to activate the specific passive effect
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    protected virtual void ActivatePassiveEffect(GameObject user)
-    {
-        if (passiveEffectPrefab != null)
-        {
-            activeEffect = Instantiate(
-                passiveEffectPrefab,
-                user.transform.position,
-                Quaternion.identity,
-                user.transform
-            );
+    protected abstract void ActivatePassiveEffect(GameObject user);
 
-            if (activeEffect.TryGetComponent<Renderer>(out var renderer))
-            {
-                renderer.material.color = smokeColor;
-            }
-        }
-    }
+    protected abstract void DeactivatePassiveEffect(GameObject user);
 
-    /// <summary>
-    /// Implemented by derived classes to deactivate the specific passive effect
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    protected virtual void DeactivatePassiveEffect(GameObject user)
-    {
-        if (activeEffect != null)
-        {
-            Destroy(activeEffect);
-            activeEffect = null;
-        }
-    }
-
-    /// <summary>
-    /// Implemented by derived classes to apply the ongoing passive effect
-    /// </summary>
-    /// <param name="user">GameObject that is using the ability</param>
-    /// <param name="deltaTime">Time since last frame</param>
     protected abstract void ApplyPassiveEffect(GameObject user, float deltaTime);
 }

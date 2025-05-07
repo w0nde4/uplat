@@ -9,7 +9,6 @@ public class Smoke : MonoBehaviour
     [SerializeField] private float maximumSmokeAmount = 100f;
     [SerializeField] private float regenerationTime = 0.5f;
     [SerializeField] private float regenerationAmount = 1f;
-    [SerializeField] private float lowSmokeThreshold = 20f;
 
     [Header("Abilities")]
     [SerializeField] private List<SmokeAbility> abilities = new List<SmokeAbility>();
@@ -20,9 +19,6 @@ public class Smoke : MonoBehaviour
     [Header("Passive Ability")]
     [SerializeField] private PassiveSmokeAbility passiveAbility;
 
-    [Header("UI References")]
-    [SerializeField] private GameObject smokeBarUI; //single responsability
-
     private float currentSmokeAmount;
     private bool isRegenerating = false;
     private SmokeAbility currentAbility;
@@ -30,7 +26,6 @@ public class Smoke : MonoBehaviour
     public event Action<float, float> OnSmokeChanged;
     public event Action<SmokeAbility> OnAbilityUsed;
     public event Action<PassiveSmokeAbility, bool> OnPassiveAbilityStateChanged;
-    public event Action OnLowSmoke; //onlowsmoke remove
 
     public float CurrentSmokeAmount => currentSmokeAmount;
     public float MaximumSmokeAmount => maximumSmokeAmount;
@@ -73,7 +68,7 @@ public class Smoke : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.PageDown))
             {
-                SpendSmoke(10f);
+                TrySpendSmoke(10f);
             }
             if (Input.GetKeyDown(KeyCode.PageUp))
             {
@@ -81,20 +76,25 @@ public class Smoke : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < abilities.Count && i < abilityKeys.Length; i++) //method
-        {
-            if (Input.GetKeyDown(abilityKeys[i]))
-            {
-                Debug.Log($"Pressed {abilityKeys[i]} for ability {abilities[i]?.name}");
-                UseAbility(abilities[i]);
-            }
-        }
+        ReadAbilitiesInput();
 
         passiveAbility.UpdatePassiveEffect(gameObject, Time.deltaTime);
 
         if (currentSmokeAmount < maximumSmokeAmount && !isRegenerating)
         {
             StartCoroutine(RegenerateSmokeOverTime());
+        }
+    }
+
+    public void ReadAbilitiesInput()
+    {
+        for (int i = 0; i < abilities.Count && i < abilityKeys.Length; i++)
+        {
+            if (Input.GetKeyDown(abilityKeys[i]))
+            {
+                Debug.Log($"Pressed {abilityKeys[i]} for ability {abilities[i]?.name}");
+                UseAbility(abilities[i]);
+            }
         }
     }
 
@@ -107,52 +107,32 @@ public class Smoke : MonoBehaviour
             float cost = ability.Use(gameObject);
             if (cost > 0)
             {
-                SpendSmoke(cost);
+                TrySpendSmoke(cost);
                 OnAbilityUsed?.Invoke(ability);
-            }
-        }
-        else
-        {
-            if (currentSmokeAmount < ability.SmokeCost)
-            {
-                OnLowSmoke?.Invoke(); 
             }
         }
     }
 
-    public bool SpendSmoke(float cost) //tryspend - bool
+    public bool TrySpendSmoke(float cost)
     {
-        if (cost > currentSmokeAmount)
+        if (cost > currentSmokeAmount || cost < 0)
         {
             return false;
         }
 
-        if (cost < 0) cost = 0;
-
         currentSmokeAmount -= cost;
         OnSmokeChanged?.Invoke(currentSmokeAmount, maximumSmokeAmount);
-
-        if (currentSmokeAmount <= lowSmokeThreshold)
-        {
-            OnLowSmoke?.Invoke();
-        }
 
         return true;
     }
 
-    public void RegenerateSmoke(float amount) //debug - rename
+    public void RegenerateSmoke(float amount)
     {
         if (amount < 0) amount = 0;
 
         float newAmount = currentSmokeAmount + amount;
-        if (newAmount > maximumSmokeAmount)
-        {
-            currentSmokeAmount = maximumSmokeAmount;
-        }
-        else
-        {
-            currentSmokeAmount = newAmount;
-        }
+        
+        currentSmokeAmount = newAmount > maximumSmokeAmount ? maximumSmokeAmount : newAmount;
 
         OnSmokeChanged?.Invoke(currentSmokeAmount, maximumSmokeAmount);
     }

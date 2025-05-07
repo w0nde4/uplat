@@ -8,6 +8,7 @@ public class EnemySettings : ScriptableObject
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float chaseSpeed = 3f;
     [SerializeField] private float detectionRange = 5f;
+    [SerializeField] private float patrolWaitInSeconds = 1f;
     [Header("Attack Settings")]
     [SerializeField] private int damage = 10;
     [SerializeField] private float attackRange = 1.5f;
@@ -20,4 +21,5 @@ public class EnemySettings : ScriptableObject
     public int Damage => damage;
     public float AttackRange => attackRange;
     public float AttackCooldown => attackCooldown;
+    public float PatrolWaitInSeconds => patrolWaitInSeconds;
 }

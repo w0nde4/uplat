@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ec9bd250541fd74397958668035eb9a, type: 3}
+  m_Name: PassiveExample
+  m_EditorClassIdentifier: 
+  powerUpName: Example
+  powerUpDescription: Example
+  icon: {fileID: 228502780, guid: 9db97d92d472bef4f8d190fd966f638a, type: 3}
+  rarity: 0
+  instancePrefab: {fileID: 3551121144314120286, guid: a1316982efd59a64087d0a95ca1ae434, type: 3}
+  baseCost: 5
+  OnActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDeactivated:
+    m_PersistentCalls:
+      m_Calls: []

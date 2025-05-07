@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerInventoryWallet))]
 public class Inventory : MonoBehaviour
 {
     [SerializeField] private InventorySection passiveSection = new InventorySection();

@@ -1,15 +1,18 @@
 using System;
 using UnityEngine;
 
-public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
+public abstract class SmokeAbility : ScriptableObject, ISmokeAbility
 {
+    [Header("Base information")]
+    [SerializeField] protected string abilityName;
+    [SerializeField][TextArea] protected string abilityDescription;
+
     [Header("Smoke Properties")]
     [SerializeField] protected float smokeCost = 10f;
     [SerializeField] protected float cooldownTime = 1.5f;
 
     [Header("Visual Effects")]
     [SerializeField] protected GameObject smokeEffectPrefab;
-    [SerializeField] protected Color smokeColor = Color.gray; //remove
     [SerializeField] protected float effectDuration = 1.0f;
 
     protected float lastUseTime = -100;
@@ -47,24 +50,7 @@ public abstract class SmokeAbility : ScriptableObject, ISmokeUsable
         lastUseTime = -cooldownTime;
     }
 
-    protected virtual void PerformAbility(GameObject user) //interface
-    {
-        if (smokeEffectPrefab != null)
-        {
-            GameObject effect = Instantiate(
-                smokeEffectPrefab,
-                user.transform.position,
-                Quaternion.identity
-            );
-
-            if (effect.TryGetComponent<Renderer>(out var renderer))
-            {
-                renderer.material.color = smokeColor;
-            }
-
-            Destroy(effect, effectDuration);
-        }
-    }
+    protected abstract void PerformAbility(GameObject user);
 
     protected float GetSmokeAmount(GameObject user)
     {

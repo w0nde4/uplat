@@ -1,10 +1,13 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(DamageHandler))]
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private EnemySettings settings;
     [SerializeField] private Transform[] patrolPoints;
-
+    
+    private DamageHandler damageHandler;
     private FSM fsm;
     private Transform player;
     private Rigidbody2D rb;
@@ -17,6 +20,7 @@ public class EnemyAI : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        damageHandler = GetComponent<DamageHandler>();
     }
 
     private void Start()

@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,7 +22,6 @@ public class SmokeUISetter : MonoBehaviour
         if (smoke != null)
         {
             smoke.OnSmokeChanged += UpdateSmokeBar;
-            smoke.OnLowSmoke += FlashLowSmoke;
             smoke.OnAbilityUsed += UpdateAbilityCooldown;
         }
     }
@@ -31,7 +31,6 @@ public class SmokeUISetter : MonoBehaviour
         if (smoke != null)
         {
             smoke.OnSmokeChanged -= UpdateSmokeBar;
-            smoke.OnLowSmoke -= FlashLowSmoke;
             smoke.OnAbilityUsed -= UpdateAbilityCooldown;
         }
     }
@@ -64,15 +63,7 @@ public class SmokeUISetter : MonoBehaviour
         }
     }
 
-    private void FlashLowSmoke()
-    {
-        if (fillImage != null)
-        {
-            StartCoroutine(FlashRoutine());
-        }
-    }
-
-    private System.Collections.IEnumerator FlashRoutine()
+    private IEnumerator FlashRoutine()
     {
         for (int i = 0; i < 3; i++)
         {
@@ -95,7 +86,7 @@ public class SmokeUISetter : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator UpdateCooldownOverlay(int index, SmokeAbility ability)
+    private IEnumerator UpdateCooldownOverlay(int index, SmokeAbility ability)
     {
         Image overlay = cooldownOverlays[index];
         overlay.fillAmount = 1f;

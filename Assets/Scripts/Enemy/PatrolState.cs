@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PatrolState : EnemyState
@@ -7,6 +9,9 @@ public class PatrolState : EnemyState
     
     private int currentPatrolIndex = 0;
     private float speed;
+
+    private bool isWaiting = false;
+    private float waitEndTime;
 
     public PatrolState(FSM fsm, EnemyAI enemy, EnemySettings settings) : base(fsm, enemy, settings) 
     {
@@ -27,12 +32,29 @@ public class PatrolState : EnemyState
         if (patrolPoints.Count == 0)
             return;
 
+        if (isWaiting)
+        {
+            if (Time.time >= waitEndTime)
+            {
+                isWaiting = false;
+                currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+            }
+            return;
+        }
+
         Transform targetPoint = patrolPoints[currentPatrolIndex];
         Enemy.MoveTowards(targetPoint.position, speed);
 
         if (Vector2.Distance(Transform.position, targetPoint.position) < 1)
         {
-            currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+            StartWaiting();
         }
+    }
+
+    private void StartWaiting()
+    {
+        isWaiting = true;
+        waitEndTime = Time.time + Settings.PatrolWaitInSeconds;
+        Enemy.SetSpeedToZero();
     }
 }
