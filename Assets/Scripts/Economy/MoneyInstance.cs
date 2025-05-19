@@ -67,14 +67,14 @@ public class MoneyInstance : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.TryGetComponent(out PlayerInventoryWallet player))
+        if (collision.gameObject.TryGetComponent(out PlayerEconomy player))
         {
             TryRecieveMoney(player);
             Destroy(gameObject);
         }
     }
 
-    private bool TryRecieveMoney(PlayerInventoryWallet player)
+    private bool TryRecieveMoney(PlayerEconomy player)
     {
         if(player == null) return false;
         player.AddMoney(moneyData.Amount);

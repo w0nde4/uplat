@@ -42,11 +42,13 @@ public class EnemyCombat : MonoBehaviour, IAttacker
         damageTarget = target;
     }
 
-    public void DeadDamage()
+    public void DealDamage()
     {
-        if (target.TryGetComponent(out IDamagable damagable))
+        if (target == null) return;
+
+        if (target.TryGetComponent(out Lifecycle lifecycle) && lifecycle.DamageHandler != null)
         {
-            damagable.TakeDamage(settings.Damage, gameObject);
+            lifecycle.DamageHandler.TakeDamage(settings.Damage, gameObject);
             lastAttackTime = Time.time;
 
             OnAttack?.Invoke(damageTarget);

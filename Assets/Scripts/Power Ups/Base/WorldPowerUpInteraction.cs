@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class WorldPowerUpInteraction : IPowerUpInteractionStrategy
 {
-    public void Interact(PowerUpInstance powerUpInstance, MonoBehaviour interactor)
+    public void Interact(PowerUpInstance powerUpInstance, IMoneyHandler moneyHandler, IPowerUpConsumer powerUpConsumer)
     {
         PowerUpData powerUp = powerUpInstance.PowerUpData;
 
-        if(interactor.TryGetComponent(out PlayerInventoryWallet player))
+        if(moneyHandler != null && powerUpConsumer != null)
         {
-            if(player.TryAcquirePowerUp(powerUp)) GameObject.Destroy(powerUpInstance.gameObject);
+            if(powerUpConsumer.TryAcquirePowerUp(powerUp)) GameObject.Destroy(powerUpInstance.gameObject);
             else Debug.Log("Inventory full!");
         }
     }

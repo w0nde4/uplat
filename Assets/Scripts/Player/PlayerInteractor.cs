@@ -1,18 +1,18 @@
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerInventoryWallet))]
+[RequireComponent(typeof(PlayerEconomy))]
 public class PlayerInteractor : MonoBehaviour
 {
     [SerializeField] private float interactRadius = 2f;
     [SerializeField] private LayerMask interactableLayer;
-    [SerializeField] private KeyCode interactKey = KeyCode.X;
+    [SerializeField] private KeyboardInput input;
 
-    private PlayerInventoryWallet playerEconomy;
+    private PlayerEconomy playerEconomy;
     private IInteractible currentTarget;
 
     private void Awake()
     {
-        playerEconomy = GetComponent<PlayerInventoryWallet>();
+        playerEconomy = GetComponent<PlayerEconomy>();
     }
 
     private void Update()
@@ -20,7 +20,7 @@ public class PlayerInteractor : MonoBehaviour
         ScanForInteractables();
         if (currentTarget != null)
         {
-            if (Input.GetKeyDown(interactKey))
+            if (input.InteractPressed)
             {
                 currentTarget.Interact(playerEconomy);
             }

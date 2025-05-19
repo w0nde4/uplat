@@ -31,14 +31,13 @@ public class Shop : MonoBehaviour //separate spawn and storage
     }
 
     [SerializeField] private List<ShopItem> shopItems = new List<ShopItem>();
-    
+    [SerializeField] private LayerMask interactibleLayer;
+     
     private int shopItemsCount;
 
     public event Action<ShopItem> OnItemSold;
 
     public IReadOnlyList<ShopItem> Items => shopItems;
-
-    
 
     private void Awake()
     {

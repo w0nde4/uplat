@@ -4,31 +4,28 @@ using UnityEngine;
 public class MoneyUISetter : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI moneyTextAmount;
-    [SerializeField] private PlayerInventoryWallet player;
+    [SerializeField] private PlayerEconomy player;
 
-    private Wallet playerWallet;
-
-    private void Awake()
-    {
-        playerWallet = player.GetComponent<Wallet>();
-    }
-
-    private void Start()
-    {
-        if (playerWallet != null)
-        {
-            UpdateCurrency(playerWallet.Currency);
-        }
-    }
+    private Wallet wallet;
 
     private void OnEnable()
     {
-        playerWallet.OnMoneyChanged += UpdateCurrency;
+        if (player != null)
+        {
+            wallet = player.Wallet;
+            if (wallet != null)
+            {
+                wallet.OnMoneyChanged += UpdateCurrency;
+                UpdateCurrency(wallet.Currency);
+            }
+            else Debug.LogError("Player's Wallet is null!");
+        }
+        else Debug.LogError("Player reference is null in MoneyUISetter!");
     }
 
     private void OnDisable()
     {
-        playerWallet.OnMoneyChanged += UpdateCurrency;
+        if (wallet != null) wallet.OnMoneyChanged -= UpdateCurrency;
     }
 
     public void UpdateCurrency(int currency)

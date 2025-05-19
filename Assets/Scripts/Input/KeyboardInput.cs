@@ -1,15 +1,21 @@
 using UnityEngine;
 
-public class KeyboardInput : MonoBehaviour, IPlayerInput
+[CreateAssetMenu(fileName = "Keyboard", menuName = "Input/Keyboard")]
+public class KeyboardInput : ScriptableObject, IPlayerInput
 {
-    public bool JumpPressed { get; private set; }
-    public bool JumpReleased { get; private set; }
-    //public Vector2 Movement { get; private set; }
+    [SerializeField] private KeyCode jumpKey = KeyCode.W;
+    [SerializeField] private KeyCode dashKey = KeyCode.LeftShift;
+    [SerializeField] private KeyCode interactKey = KeyCode.X;
+    [SerializeField] private KeyCode attackKey = KeyCode.F;
+    [SerializeField] private KeyCode switchAttackKey = KeyCode.C;
+    
+    private readonly string horizontalAxis = "Horizontal";
 
-    private void Update()
-    {
-        JumpPressed = Input.GetKeyDown(KeyCode.W);
-        JumpReleased = Input.GetKeyUp(KeyCode.W);
-        //Movement = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-    }
+    public bool AttackPressed => Input.GetKeyDown(attackKey);
+    public bool SwitchAttackPressed => Input.GetKeyDown(switchAttackKey);
+    public bool JumpPressed => Input.GetKeyDown(jumpKey);
+    public bool JumpReleased => Input.GetKeyUp(jumpKey);
+    public bool DashPressed => Input.GetKeyDown(dashKey);
+    public float HorizontalInput => Input.GetAxis(horizontalAxis);
+    public bool InteractPressed => Input.GetKeyDown(interactKey);
 }

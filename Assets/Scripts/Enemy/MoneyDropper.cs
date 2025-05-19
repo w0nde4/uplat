@@ -1,7 +1,6 @@
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
-[RequireComponent(typeof(DeathHandler))]
+[RequireComponent(typeof(Lifecycle))]
 public class MoneyDropper : MonoBehaviour
 {
     [SerializeField] private MoneyData moneyData;
@@ -18,21 +17,21 @@ public class MoneyDropper : MonoBehaviour
     [SerializeField] private int minMoneyRange = 10;
     [SerializeField] private int maxMoneyRange = 20;
 
-    private DeathHandler deathHandler;
+    private Lifecycle lifecycle;
 
     private void Awake()
     {
-        deathHandler = GetComponent<DeathHandler>();
+        lifecycle = GetComponent<Lifecycle>();
     }
 
     private void OnEnable()
     {
-        deathHandler.OnDeath += DropMoney;
+        lifecycle.DeathHandler.OnDeath += DropMoney;
     }
 
     private void OnDisable()
     {
-        deathHandler.OnDeath -= DropMoney;
+        lifecycle.DeathHandler.OnDeath -= DropMoney;
     }
 
     public void DropMoney()

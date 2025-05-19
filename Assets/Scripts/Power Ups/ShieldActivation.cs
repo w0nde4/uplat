@@ -5,6 +5,8 @@ public class ShieldActivation : TimedActivePowerUp, IDamageInterceptor
 {
     [SerializeField] private float blockDamagePercent = 30;
 
+    private GameObject player;
+
     public override void ApplyEffect()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
@@ -21,6 +23,11 @@ public class ShieldActivation : TimedActivePowerUp, IDamageInterceptor
     }
 
     public bool CanApplyDamage(GameObject damager) => true;
+
+    public void Initialize(MonoBehaviour coroutineRunner)
+    {
+        player = coroutineRunner.gameObject;
+    }
 
     public int ModifyDamage(int damage, GameObject damagable)
     {

@@ -2,10 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class Health : MonoBehaviour
+public class Health
 {
-    [SerializeField] private int max = 100;
-
+    private int max;
     private int current;
 
     public int Max => max;
@@ -13,24 +12,10 @@ public class Health : MonoBehaviour
 
     public event Action<int, int> OnChanged;
 
-    private void Awake()
+    public Health(int max)
     {
-        current = max;
-    }
-
-    private void Update()
-    {
-        if (Debug.isDebugBuild && CompareTag("Player"))
-        {
-            if (Input.GetKeyUp(KeyCode.DownArrow))
-            {
-                Decrease(10);
-            }
-            if (Input.GetKeyUp(KeyCode.UpArrow))
-            {
-                Increase(10);
-            }
-        }
+        this.max = Mathf.Max(max, 1);
+        current = this.max;
     }
 
     public void Increase(int value)

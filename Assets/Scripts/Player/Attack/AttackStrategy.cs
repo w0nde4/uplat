@@ -2,36 +2,89 @@ using UnityEngine;
 
 public abstract class AttackStrategy : ScriptableObject
 {
+    [Header("Базовые настройки атаки")]
     [SerializeField] protected int baseDamage = 10;
-    [SerializeField] protected float attackRange = 1.5f;
-    [SerializeField] protected LayerMask targetLayer;
+    [SerializeField] protected float attackRange = 2f;
+    [SerializeField] protected LayerMask enemyLayer;
+    [SerializeField] protected Transform customAttackOrigin;
 
-    public abstract void PerformAttack(GameObject attacker);
+    protected GameObject owner;
+    protected Transform attackOrigin;
+    protected bool isAttacking;
 
-    public virtual int CalculateDamage(float damageMultiplier)
+    public virtual void Initialize(GameObject owner)
     {
-        return Mathf.RoundToInt(baseDamage * damageMultiplier);
-    }
+        isAttacking = false;
+        this.owner = owner;
 
-    public virtual void ApplyDamage(GameObject target, GameObject attacker, int damage)
-    {
-        if(target.TryGetComponent(out IDamagable damagable))
+        if (customAttackOrigin != null)
         {
-            Debug.Log(target.name + " получил " + damage + " урона.");
-            damagable.TakeDamage(damage, attacker);
+            attackOrigin = customAttackOrigin;
+        }
+        else
+        {
+            var attackPoint = owner.transform.Find("AttackPoint");
+            attackOrigin = attackPoint != null ? attackPoint : owner.transform;
         }
     }
 
-    public virtual Collider2D[] GetAttackedEnemies(Vector2 attackPosition)
+    public virtual void TryPerformAttack()
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPosition, attackRange, targetLayer);
-        Debug.Log("Найдено врагов: " + hitEnemies.Length);
-        return hitEnemies;
+        if (isAttacking || owner == null) return;
+        PerformAttack();
     }
 
-    public virtual bool SupportsCombo() => false; //interface
-    public virtual void OnComboReset() { }
-    public virtual void OnComboPerformed() { }
-    public virtual int GetComboStep() => 0;
+    protected virtual void PerformAttack()
+    {
+        isAttacking = true;
+    }
+
     public virtual void UpdateStrategy(float deltaTime) { }
+
+    public virtual void OnAttackEnd()
+    {
+        isAttacking = false;
+    }
+
+    public virtual void ApplyDamageToTargets()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(
+            attackOrigin.position,
+            attackRange,
+            enemyLayer
+        );
+
+        foreach (var hitCollider in hitColliders)
+        {
+            ApplyDamageToTarget(hitCollider.gameObject, CalculateDamage());
+        }
+    }
+
+    protected virtual void ApplyDamageToTarget(GameObject target, int damage)
+    {
+        var damageable = target.GetComponent<IDamagable>();
+        if (damageable != null)
+        {
+            damageable.TakeDamage(damage, owner);
+        }
+        else
+        {
+            Debug.LogWarning($"Объект {target.name} не может получать урон (отсутствует компонент IDamageable)");
+        }
+    }
+
+    protected virtual int CalculateDamage()
+    {
+        return baseDamage;
+    }
+
+#if UNITY_EDITOR
+    protected virtual void OnDrawGizmosSelected()
+    {
+        if (attackOrigin == null) return;
+
+        UnityEditor.Handles.color = Color.red;
+        UnityEditor.Handles.DrawWireDisc(attackOrigin.position, Vector3.forward, attackRange);
+    }
+#endif
 }

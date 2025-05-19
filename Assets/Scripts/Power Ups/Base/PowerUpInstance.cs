@@ -11,12 +11,13 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 {
     [SerializeField] private PowerUpData powerUpData;
     [SerializeField] private PowerUpContext context;
-    
+    [SerializeField] private LayerMask interactibleLayer;
     [SerializeField] private SpriteRenderer highlightRenderer;
     [SerializeField] private Color highlightColor = Color.yellow;
 
     private Color originalColor;
     private bool isHighlighted = false;
+    private Collider2D col;
 
     private IPowerUpInteractionStrategy interactionStrategy;
 
@@ -30,24 +31,30 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
 
     private void Start()
     {
+        if(TryGetComponent(out Collider2D col))
+            col.isTrigger = true;
+
         if (highlightRenderer != null)
             originalColor = highlightRenderer.color;
 
-        if (gameObject.layer != LayerMask.NameToLayer("Interactible"))
+        int layer = interactibleLayer.value;
+        
+        if (layer != 0)
         {
-            Debug.LogError($"Set {gameObject} layer to interactible");
+            int firstEnabledLayer = (int)Mathf.Log(layer, 2);
+            gameObject.layer = firstEnabledLayer;
+        }
+        else
+        {
+            Debug.LogError("LayerMask is empty!");
         }
 
         if (interactionStrategy == null)
         {
             if (context == PowerUpContext.World)
-            {
                 interactionStrategy = new WorldPowerUpInteraction();
-            }
             else
-            {
                 Debug.LogError("ShopPowerUpInteraction must be set manually via Init");
-            }
         }
     }
 
@@ -71,9 +78,9 @@ public class PowerUpInstance : MonoBehaviour, IInteractible
             return;
         }
 
-        if(interactor is MonoBehaviour player)
+        if(interactor is IMoneyHandler moneyHandler && interactor is IPowerUpConsumer powerUpConsumer)
         {
-            interactionStrategy?.Interact(this, player);
+            interactionStrategy?.Interact(this, moneyHandler, powerUpConsumer);
         }
     }
 

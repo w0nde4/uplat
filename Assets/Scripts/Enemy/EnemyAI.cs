@@ -1,16 +1,15 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(DamageHandler))]
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private EnemySettings settings;
     [SerializeField] private Transform[] patrolPoints;
     
-    private DamageHandler damageHandler;
     private FSM fsm;
     private Transform player;
     private Rigidbody2D rb;
+    private EnemyCombat combat;
 
     public Transform[] PatrolPoints => patrolPoints;
     public Transform PlayerTransform => player;
@@ -19,8 +18,8 @@ public class EnemyAI : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        TryGetComponent(out combat);
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        damageHandler = GetComponent<DamageHandler>();
     }
 
     private void Start()
@@ -39,13 +38,8 @@ public class EnemyAI : MonoBehaviour
         }
 
         fsm.AddState(new PatrolState(fsm, this, settings));
-        fsm.AddState(new ChaseState(fsm, this, settings));
-        
-        if(TryGetComponent(out EnemyCombat combat))
-            fsm.AddState(new AttackState(fsm, this, settings, combat));
-
-        else
-            Debug.LogWarning("Cant add combat component because enemy instance doesn't contain one");
+        fsm.AddState(new ChaseState(fsm, this, settings));    
+        fsm.AddState(new AttackState(fsm, this, settings, combat));
 
         fsm.SetState<PatrolState>();
     }

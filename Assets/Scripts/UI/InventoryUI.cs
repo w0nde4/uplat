@@ -4,9 +4,11 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class InventoryUI : MonoBehaviour
 {
-    [SerializeField] private Inventory inventory;
+    [SerializeField] private PlayerEconomy player;
     [SerializeField] private GameObject[] gameObjectsToDisable;
+    
     private Image mainPanel;
+    private Inventory inventory;
 
     private bool isOpen = false;
 

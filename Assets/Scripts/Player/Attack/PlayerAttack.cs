@@ -1,52 +1,84 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackStrategy[] attackStrategies;
-
-    private float damageMultiplier = 1f; //multiplier to another
-
-    public float DamageMultiplier
-    {
-        get
-        {
-            return damageMultiplier;
-        }
-        set
-        {
-            if (value >= 1) damageMultiplier = value;
-            else damageMultiplier = 1f;
-        }
-    }
-
+    [SerializeField] private KeyboardInput input;
 
     private int currentStrategyIndex = 0;
+    private AttackStrategy currentStrategy;
+
+    private void Start()
+    {
+        if (attackStrategies.Length == 0)
+        {
+            Debug.LogError("Не назначены стратегии атаки в PlayerAttack!");
+            return;
+        }
+
+        InitializeStrategies();
+    }
+
+    private void InitializeStrategies()
+    {
+        foreach (var strategy in attackStrategies)
+        {
+            strategy.Initialize(gameObject);
+        }
+
+        UpdateCurrentStrategy();
+    }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        HandleInput();
+        currentStrategy?.UpdateStrategy(Time.deltaTime);
+    }
+
+    private void HandleInput()
+    {
+        if (input.AttackPressed && currentStrategy != null)
         {
-            PerformAttack();
+            currentStrategy.TryPerformAttack();
         }
 
-        if (Input.GetKeyDown(KeyCode.C))
+        if (input.SwitchAttackPressed)
         {
             SwitchAttackStrategy();
         }
+    }
 
-        attackStrategies[currentStrategyIndex]?.UpdateStrategy(Time.deltaTime);
+    public void DealDamage()
+    {
+        if (currentStrategy != null)
+        {
+            currentStrategy.ApplyDamageToTargets();
+        }
+    }
+
+    public void EndAttack()
+    {
+        if (currentStrategy != null)
+        {
+            currentStrategy.OnAttackEnd();
+        }
     }
 
     private void SwitchAttackStrategy()
     {
         currentStrategyIndex = (currentStrategyIndex + 1) % attackStrategies.Length;
+        UpdateCurrentStrategy();
     }
 
-    private void PerformAttack()
+    private void UpdateCurrentStrategy()
     {
-        attackStrategies[currentStrategyIndex]?.PerformAttack(gameObject);
+        if (attackStrategies.Length == 0) return;
+
+        currentStrategy = attackStrategies[currentStrategyIndex];
+    }
+
+    public AttackStrategy GetCurrentStrategy()
+    {
+        return currentStrategy;
     }
 }

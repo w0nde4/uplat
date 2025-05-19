@@ -149,5 +149,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   powerUpData: {fileID: 11400000, guid: 954d936dd2b12ed4badbe521502a1992, type: 2}
   context: 1
+  interactibleLayer:
+    serializedVersion: 2
+    m_Bits: 2048
   highlightRenderer: {fileID: 6413298081022203366}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

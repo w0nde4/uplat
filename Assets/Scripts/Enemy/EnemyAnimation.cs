@@ -3,17 +3,15 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(DamageHandler))]
-[RequireComponent(typeof(DeathHandler))]
 [RequireComponent(typeof(EnemyAI))]
+[RequireComponent(typeof(Lifecycle))]
 
 public class EnemyAnimation : MonoBehaviour
 {
     private Animator animator;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private DamageHandler damageHandler;
-    private DeathHandler deathHandler;
+    private Lifecycle lifecycle;
     private EnemyAI enemyAI;
 
     private readonly string attackTrigger = "AttackTrigger";
@@ -26,23 +24,22 @@ public class EnemyAnimation : MonoBehaviour
         animator = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        damageHandler = GetComponent<DamageHandler>();
-        deathHandler = GetComponent<DeathHandler>();
+        lifecycle = GetComponent<Lifecycle>();
         enemyAI = GetComponent<EnemyAI>();
     }
 
     private void OnEnable()
     {
         EnemyEvent.OnAttackStart += HandleAttackStarted;
-        deathHandler.OnDeath += HandleDeath;
-        damageHandler.OnDamageRecieved += HandleDamageRecieved;
+        lifecycle.DeathHandler.OnDeath += HandleDeath;
+        lifecycle.DamageHandler.OnDamageRecieved += HandleDamageRecieved;
     }
 
     private void OnDisable()
     {
         EnemyEvent.OnAttackStart -= HandleAttackStarted;
-        deathHandler.OnDeath -= HandleDeath;
-        damageHandler.OnDamageRecieved -= HandleDamageRecieved;
+        lifecycle.DeathHandler.OnDeath -= HandleDeath;
+        lifecycle.DamageHandler.OnDamageRecieved -= HandleDamageRecieved;
     }
 
     private void Update()

@@ -6,31 +6,28 @@ public class HealthUISetter : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI hpTextAmount;
     [SerializeField] private Slider healthSlider;
-    [SerializeField] private Player player;
+    [SerializeField] private Lifecycle player;
 
-    private Health playerHealth;
-
-    private void Awake()
-    {
-        playerHealth = player.GetComponent<Health>();
-    }
-
-    private void Start()
-    {
-        if (playerHealth != null)
-        {
-            UpdateHealthBar(playerHealth.Current, playerHealth.Max);
-        }
-    }
+    private Health health;
 
     private void OnEnable()
     {
-        playerHealth.OnChanged += UpdateHealthBar;
+        if (player != null)
+        {
+            health = player.Health;
+            if (health != null)
+            {
+                health.OnChanged += UpdateHealthBar;
+                UpdateHealthBar(health.Current, health.Max);
+            }
+            else Debug.LogError("Player's Health is null!");
+        }
+        else Debug.LogError("Player reference is null in HealthUISetter!");
     }
 
     private void OnDisable()
     {
-        playerHealth.OnChanged -= UpdateHealthBar;
+        if (health != null) health.OnChanged -= UpdateHealthBar;
     }
 
     public void UpdateHealthBar(int current, int max)

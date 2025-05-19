@@ -3,14 +3,21 @@ using UnityEngine.UI;
 
 public class ActiveInventoryUI : MonoBehaviour
 {
-    [SerializeField] private Inventory inventory;
+    [SerializeField] private PlayerEconomy player;
+
+    private Inventory inventory;
 
     private void OnEnable()
     {
-        if (inventory != null)
+        if (player != null)
         {
-            inventory.OnPowerUpAdded += HandlePowerUpAdded;
-            inventory.OnPowerUpRemoved += HandlePowerUpRemoved;
+            inventory = player.Inventory;
+            
+            if (inventory != null)
+            {
+                inventory.OnPowerUpAdded += HandlePowerUpAdded;
+                inventory.OnPowerUpRemoved += HandlePowerUpRemoved;
+            }
         }
     }
 

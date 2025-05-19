@@ -1,18 +1,16 @@
 using System;
 using UnityEngine;
 
-public class Wallet : MonoBehaviour
+public class Wallet
 {
-    [SerializeField] private int startingMoney = 100;
-
     private int currentMoney;
     public int Currency => currentMoney;
 
     public event Action<int> OnMoneyChanged; 
 
-    private void Awake()
+    public Wallet(int startingMoney)
     {
-        currentMoney = startingMoney;
+        currentMoney = Mathf.Max(startingMoney, 0);
     }
 
     public bool TrySpend(int amount)

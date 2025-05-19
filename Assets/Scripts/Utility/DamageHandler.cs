@@ -2,24 +2,23 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
-public class DamageHandler : MonoBehaviour, IDamagable
+public class DamageHandler : IDamagable
 {
-    [SerializeField] private Health health;
-    
+    private Health health;
     private List<IDamageInterceptor> interceptors = new List<IDamageInterceptor>();
+    private MonoBehaviour coroutineRunner;
 
     public event Action<GameObject> OnDamageRecieved;
 
-    private void Awake()
+    public DamageHandler(Health health, MonoBehaviour coroutineRunner, List<IDamageInterceptor> interceptors = null)
     {
-        var componentInterceptors = GetComponents<IDamageInterceptor>();
-        foreach (var interceptor in componentInterceptors)
-        {
-            interceptors.Add(interceptor);
-        }
+        this.health = health;
+        this.coroutineRunner = coroutineRunner;
 
-        health = GetComponent<Health>();
+        foreach (var interceptor in interceptors)
+        {
+            RegisterInterceptor(interceptor);
+        }
     }
 
     public void RegisterInterceptor(IDamageInterceptor interceptor)
@@ -27,6 +26,7 @@ public class DamageHandler : MonoBehaviour, IDamagable
         if (!interceptors.Contains(interceptor))
         {
             interceptors.Add(interceptor);
+            interceptor.Initialize(coroutineRunner);
             Debug.Log("Damage interceptor registered: " + interceptor.GetType().Name);
         }
     }

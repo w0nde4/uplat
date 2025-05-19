@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-[RequireComponent(typeof(DamageHandler))]
+[RequireComponent(typeof(Lifecycle))]
 public class HitFeedbackSystem : MonoBehaviour
 {
     [SerializeField] private List<HitFeedbackEffectData> feedbackEffects = new List<HitFeedbackEffectData>();
@@ -14,21 +14,21 @@ public class HitFeedbackSystem : MonoBehaviour
         public MonoBehaviour effectComponent;
     }
 
-    private DamageHandler damageHandler;
+    private Lifecycle lifecycle;
 
     private void Awake()
     {
-        damageHandler = GetComponent<DamageHandler>();
+        lifecycle = GetComponent<Lifecycle>();
     }
 
     private void OnEnable()
     {
-        damageHandler.OnDamageRecieved += HandleDamageReceived;
+        lifecycle.DamageHandler.OnDamageRecieved += HandleDamageReceived;
     }
 
     private void OnDisable()
     {
-        damageHandler.OnDamageRecieved -= HandleDamageReceived;
+        lifecycle.DamageHandler.OnDamageRecieved -= HandleDamageReceived;
     }
 
     private void HandleDamageReceived(GameObject damager)

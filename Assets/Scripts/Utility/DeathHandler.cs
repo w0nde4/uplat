@@ -1,20 +1,33 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
-public class DeathHandler : MonoBehaviour
+public class DeathHandler
 {
-    [SerializeField] private Health health;
-    [SerializeField] private MonoBehaviour[] componentsToDisable;
+    private Health health;
+    private List<MonoBehaviour> componentsToDisable = new List<MonoBehaviour>();
 
     public event Action OnDeath;
 
-    private void OnEnable()
+    public DeathHandler(Health health, List<MonoBehaviour> componentsToDisable = null)
+    {
+        this.health = health;
+        if(componentsToDisable != null) this.componentsToDisable = componentsToDisable;
+
+        Subscribe();
+    }
+
+    ~DeathHandler()
+    {
+        Unsubscribe();
+    }
+
+    private void Subscribe()
     {
         health.OnChanged += CheckDeath;
     }
 
-    private void OnDisable()
+    private void Unsubscribe()
     {
         health.OnChanged -= CheckDeath;
     }
